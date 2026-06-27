@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMYS V.1 Professional - Sistem Skrining Puskesmas</title>
+    
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./internal_assets/xlsx.full.min.js"></script>
+    <script src="./internal_assets/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); --glass-bg: rgba(255, 255, 255, 0.4); --text-main: #1e293b; }
+        .dark { --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --glass-bg: rgba(30, 41, 59, 0.7); --text-main: #f1f5f9; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; transition: background 0.3s ease; }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .animate-fade { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .radio-custom:checked + .radio-label { background-color: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.05); }
+        @media print { .no-print { display: none !important; } }
+    </style>
+<meta name="theme-color" content="#3b82f6"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-512.png">
+</head>
+<body class="p-4 md:p-8 flex justify-center items-start">
+
+    <div class="fixed top-4 left-4 z-50 flex items-center gap-2 no-print">
+        <div id="net-status" class="px-3 py-1 rounded-full glass text-[10px] font-bold flex items-center gap-2">
+            <span id="net-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="net-text">ONLINE</span>
+        </div>
+    </div>
+
+    <div class="fixed top-4 right-4 flex gap-2 no-print z-50">
+        <button onclick="showHistory()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold">📜 Riwayat</button>
+        <button onclick="toggleDarkMode()" class="p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
+    </div>
+
+    <div id="app" class="w-full max-w-4xl glass rounded-[32px] p-6 md:p-10 relative overflow-hidden shadow-2xl">
+        
+        <div id="step-landing" class="text-center py-10 animate-fade">
+            <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">MMYS V.1 <span class="text-blue-500">PRO</span></h1>
+            <p class="text-slate-500 dark:text-slate-400 mb-8 italic">Puskesmas Sampanahan Digital Ecosystem</p>
+            
+            <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-6 rounded-3xl border border-white">
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Nama Peserta</label>
+                    <input type="text" id="initNama" placeholder="Hanya huruf..." class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Usia (7-18 Tahun)</label>
+                    <input type="number" id="initUsia" placeholder="Contoh: 14" class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <button onclick="checkAutoMode()" id="btnStart" class="w-full mt-4 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg flex justify-center items-center gap-2">
+                    Mulai Skrining Sekarang
+                </button>
+            </div>
+        </div>
+
+        <div id="main-form" class="hidden animate-fade">
+            <div class="mb-6 no-print">
+                <div class="flex justify-between text-xs font-bold text-blue-600 mb-2 uppercase tracking-widest">
+                    <span id="progress-text">Progres: 0%</span>
+                    <span id="question-counter">Soal 0/6</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="questions-container" class="space-y-8"></div>
+
+            <div class="mt-10 flex gap-4 no-print">
+                <button onclick="prosesSkoring()" id="btnSubmit" class="flex-1 bg-slate-800 dark:bg-blue-600 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition active:scale-95 shadow-xl">
+                    Kirim & Lihat Analisis
+                </button>
+            </div>
+        </div>
+
+        <div id="result-section" class="hidden animate-fade pt-4">
+            <div class="flex justify-between items-center no-print mb-6">
+                <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600">← Kembali</button>
+                <div class="flex gap-2">
+                    <span id="sync-status" class="text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter">Local Saved</span>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">📊 Excel</button>
+                </div>
+            </div>
+            
+            <div id="print-area" class="text-center">
+                <h2 class="font-bold text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS V.1</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8 text-sm p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
+                    <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
+                    <p><span class="opacity-60">Usia:</span> <b id="resUsia"></b> th</p>
+                    <p><span class="opacity-60">Tanggal:</span> <b id="resTgl"></b></p>
+                    <p><span class="opacity-60">ID Transaksi:</span> <b id="resID" class="text-[10px] font-mono"></b></p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 text-left">
+                    <div id="boxAnxietas" class="p-6 rounded-2xl border-2 transition-all">
+                        <h4 class="text-xs font-bold uppercase opacity-60 mb-2">Skala Ansietas</h4>
+                        <p id="resAnx" class="text-lg font-bold mb-1"></p>
+                        <span id="scoreAnx" class="text-xs font-medium px-2 py-1 rounded bg-black/5"></span>
+                    </div>
+                    <div id="boxDepresi" class="p-6 rounded-2xl border-2 transition-all">
+                        <h4 class="text-xs font-bold uppercase opacity-60 mb-2">Skala Depresi</h4>
+                        <p id="resDep" class="text-lg font-bold mb-1"></p>
+                        <span id="scoreDep" class="text-xs font-medium px-2 py-1 rounded bg-black/5"></span>
+                    </div>
+                </div>
+
+                <div class="mt-8 py-6 border-t border-dashed border-slate-300">
+                    <div id="qrcode" class="flex justify-center mb-2"></div>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital</p>
+                </div>
+            </div>
+
+            <button onclick="window.print()" class="no-print w-full mt-6 bg-white border-2 border-slate-800 text-slate-800 font-bold py-3 rounded-xl">🖨️ Cetak Hasil</button>
+        </div>
+    </div>
+
+    <script>
+        // URL WEB APP ANDA SUDAH DIPERBARUI SECARA OTOMATIS DI SINI:
+        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx9FVWT8WOd9GT9SbU1LZWvB6F63RoL-tKKvS0ghQrdIZnTYhmfH47rEnBQNS6k1uSDMQ/exec';
+        let currentMode = '', lastResult = null;
+
+        // 1. Sanitasi Input (Update Professional)
+        document.getElementById('initNama').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+        });
+
+        // 2. Online/Offline Detector (Sync Engine)
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        function updateNetworkStatus() {
+            const dot = document.getElementById('net-dot');
+            const text = document.getElementById('net-text');
+            if(navigator.onLine) {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                text.innerText = "ONLINE";
+                processPendingSync();
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-rose-500";
+                text.innerText = "OFFLINE";
+            }
+        }
+
+        const questions = {
+            anak: {
+                A: ["Sering merasa khawatir/tidak tenang, tegang, deg-degan terhadap hal negatif.", "Berpikir berlebihan & sulit mengendalikan diri terhadap hal negatif.", "Sulit tidur/konsentrasi saat memikirkan hal negatif."],
+                B: ["Sering sedih/tertekan tanpa sebab jelas.", "Kehilangan minat pada kegiatan yang biasanya disukai.", "Sering capek, sulit tidur, dan sulit fokus belajar."]
+            },
+            remaja: {
+                A: ["Saya sering merasa khawatir, tegang, atau gelisah terhadap masa depan/hal negatif.", "Saya merasa sulit mengontrol pikiran berlebihan saya.", "Saya sering sulit tidur karena pikiran yang mengganggu."],
+                B: ["Saya merasa sedih, hampa, atau putus asa hampir setiap hari.", "Saya kehilangan minat pada hobi atau teman-teman saya.", "Saya merasa sangat lelah atau tidak berenergi untuk beraktivitas."]
+            }
+        };
+
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+
+        function checkAutoMode() {
+            const nama = document.getElementById('initNama').value.trim();
+            const usia = parseInt(document.getElementById('initUsia').value);
+            if(!nama || isNaN(usia)) return Swal.fire('Error', 'Lengkapi data terlebih dahulu', 'error');
+            if(usia < 7 || usia > 18) return Swal.fire('Error', 'Usia harus 7-18 tahun', 'warning');
+            
+            currentMode = (usia <= 9) ? 'anak' : 'remaja';
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            document.getElementById('step-landing').classList.add('hidden');
+            document.getElementById('main-form').classList.remove('hidden');
+            const container = document.getElementById('questions-container');
+            
+            let html = '<div class="space-y-6">';
+            ['A', 'B'].forEach(type => {
+                const label = type === 'A' ? 'ANXIETAS' : 'DEPRESI';
+                html += `<h3 class="font-bold text-blue-600 dark:text-blue-400 text-sm tracking-widest underline underline-offset-8">SKALA ${label}</h3>`;
+                questions[currentMode][type].forEach((q, i) => {
+                    html += `
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 border border-white/20 hover:border-blue-300 transition-all">
+                            <p class="text-sm flex-1"><span class="font-bold text-blue-500 mr-2">${i+1}.</span> ${q}</p>
+                            <div class="flex gap-2 w-full md:w-auto">
+                                ${[1, 0].map(v => `
+                                    <label class="flex-1 md:w-20 cursor-pointer">
+                                        <input type="radio" name="${type}${i}" value="${v}" onchange="updateProgress()" class="hidden radio-custom">
+                                        <div class="radio-label text-center py-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 text-xs font-bold transition-all">${v?'Ya':'Tidak'}</div>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+            container.innerHTML = html + '</div>';
+            window.scrollTo(0,0);
+        }
+
+        function updateProgress() {
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const pct = Math.round((answered/6)*100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('progress-text').innerText = `Progres: ${pct}%`;
+            document.getElementById('question-counter').innerText = `Soal ${answered}/6`;
+        }
+
+        async function prosesSkoring() {
+            const answered = document.querySelectorAll('input[type="radio"]:checked');
+            if(answered.length < 6) return Swal.fire('Belum Lengkap', 'Jawab semua pertanyaan dulu', 'warning');
+
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin mr-2">🌀</span> Memproses Skor...`;
+
+            const getScore = (p) => [0,1,2].reduce((t,i) => t + parseInt(document.querySelector(`input[name="${p}${i}"]:checked`).value), 0);
+            const scoreA = getScore('A'), scoreB = getScore('B');
+
+            const data = {
+                id: `MMYS-${Date.now()}-${document.getElementById('initNama').value.substring(0,3).toUpperCase()}`,
+                nama: document.getElementById('initNama').value,
+                usia: document.getElementById('initUsia').value,
+                tanggal: new Date().toLocaleDateString('id-ID'),
+                scoreA, scoreB,
+                interA: interpret(scoreA),
+                interB: interpret(scoreB),
+                status: 'pending'
+            };
+
+            setTimeout(() => {
+                displayResult(data);
+                saveLocally(data);
+                syncToSheets(data);
+            }, 800);
+        }
+
+        function interpret(s) {
+            if(s >= 2) return { text: "Gejala Berat", color: "border-rose-500 bg-rose-50 text-rose-700" };
+            if(s === 1) return { text: "Gejala Ringan", color: "border-amber-500 bg-amber-50 text-amber-700" };
+            return { text: "Normal / Stabil", color: "border-emerald-500 bg-emerald-50 text-emerald-700" };
+        }
+
+        function displayResult(d) {
+            lastResult = d;
+            document.getElementById('resNama').innerText = d.nama;
+            document.getElementById('resUsia').innerText = d.usia;
+            document.getElementById('resTgl').innerText = d.tanggal;
+            document.getElementById('resID').innerText = d.id;
+
+            document.getElementById('resAnx').innerText = d.interA.text;
+            document.getElementById('scoreAnx').innerText = `Skor: ${d.scoreA}/3`;
+            document.getElementById('boxAnxietas').className = `p-6 rounded-2xl border-2 transition-all ${d.interA.color}`;
+
+            document.getElementById('resDep').innerText = d.interB.text;
+            document.getElementById('scoreDep').innerText = `Skor: ${d.scoreB}/3`;
+            document.getElementById('boxDepresi').className = `p-6 rounded-2xl border-2 transition-all ${d.interB.color}`;
+
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: d.id, width: 80, height: 80 });
+
+            document.getElementById('main-form').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+        }
+
+        function saveLocally(data) {
+            let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+            history.unshift(data);
+            localStorage.setItem('mmys_history', JSON.stringify(history.slice(0, 100)));
+        }
+
+        // AMAN & SELARAS: Menggunakan format data text/plain stream untuk bypass CORS Google Apps Script secara andal
+        async function syncToSheets(data) {
+            if(!navigator.onLine) return;
+            try {
+                const response = await fetch(SHEETS_URL, { 
+                    method: 'POST', 
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(data) 
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    updateSyncUI(data.id);
+                }
+            } catch (e) { console.log('Koneksi terhambat, data disimpan sementara di memori lokal.'); }
+        }
+
+        function updateSyncUI(id) {
+            const status = document.getElementById('sync-status');
+            status.innerText = "Synced to Cloud";
+            status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
+            
+            let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+            const idx = history.findIndex(h => h.id === id);
+            if(idx !== -1) { history[idx].status = 'synced'; localStorage.setItem('mmys_history', JSON.stringify(history)); }
+        }
+
+        function processPendingSync() {
+            let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+            history.filter(h => h.status === 'pending').forEach(h => syncToSheets(h));
+        }
+
+        function showHistory() {
+            const history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+            if(!history.length) return Swal.fire('Kosong', 'Belum ada riwayat', 'info');
+            
+            const list = history.map(h => `
+                <div class="flex justify-between items-center p-3 border-b text-xs text-left">
+                    <div><b>${h.nama}</b><br><span class="opacity-50">${h.tanggal}</span></div>
+                    <div class="flex gap-1">
+                        <span class="px-2 py-1 rounded ${h.interA.color.split(' ')[0]} border">A:${h.scoreA}</span>
+                        <span class="px-2 py-1 rounded ${h.interB.color.split(' ')[0]} border">D:${h.scoreB}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            Swal.fire({
+                title: 'Riwayat 100 Data Terakhir',
+                html: `<div class="max-h-80 overflow-y-auto">${list}</div>`,
+                showDenyButton: true,
+                denyButtonText: 'Hapus Riwayat'
+            }).then(res => {
+                if(res.isDenied) { localStorage.removeItem('mmys_history'); location.reload(); }
+            });
+        }
+
+        function exportToExcel() {
+            if(!lastResult) return;
+            const ws = XLSX.utils.json_to_sheet([lastResult]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "MMYS_Data");
+            XLSX.writeFile(wb, `MMYS_${lastResult.nama}.xlsx`);
+        }
+
+        setInterval(processPendingSync, 10000);
+
+        if('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+        }
+    </script>
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</body>
+</html>
