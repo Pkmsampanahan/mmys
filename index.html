@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MMYS V.1 Professional - Sistem Skrining Puskesmas</title>
     
-    <meta name="theme-color" content="#3b82f6">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-512.png">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="./internal_assets/xlsx.full.min.js"></script>
-    <script src="./internal_assets/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root { --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); --glass-bg: rgba(255, 255, 255, 0.4); --text-main: #1e293b; }
@@ -25,16 +21,8 @@
         .radio-custom:checked + .radio-label { background-color: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.05); }
         @media print { .no-print { display: none !important; } }
     </style>
-<meta name="theme-color" content="#3b82f6"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-512.png">
 </head>
 <body class="p-4 md:p-8 flex justify-center items-start">
-
-    <div class="fixed top-4 left-4 z-50 flex items-center gap-2 no-print">
-        <div id="net-status" class="px-3 py-1 rounded-full glass text-[10px] font-bold flex items-center gap-2">
-            <span id="net-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="net-text">ONLINE</span>
-        </div>
-    </div>
 
     <div class="fixed top-4 right-4 flex gap-2 no-print z-50">
         <button onclick="showHistory()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold">📜 Riwayat</button>
@@ -76,7 +64,7 @@
             <div id="questions-container" class="space-y-8"></div>
 
             <div class="mt-10 flex gap-4 no-print">
-                <button onclick="prosesSkoring()" id="btnSubmit" class="flex-1 bg-slate-800 dark:bg-blue-600 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition active:scale-95 shadow-xl">
+                <button onclick="prosesSkoring()" id="btnSubmit" class="w-full bg-slate-800 dark:bg-blue-600 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition active:scale-95 shadow-xl">
                     Kirim & Lihat Analisis
                 </button>
             </div>
@@ -125,31 +113,12 @@
     </div>
 
     <script>
-        // URL WEB APP ANDA SUDAH DIPERBARUI SECARA OTOMATIS DI SINI:
-        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx9FVWT8WOd9GT9SbU1LZWvB6F63RoL-tKKvS0ghQrdIZnTYhmfH47rEnBQNS6k1uSDMQ/exec';
+        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
         let currentMode = '', lastResult = null;
 
-        // 1. Sanitasi Input (Update Professional)
         document.getElementById('initNama').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
         });
-
-        // 2. Online/Offline Detector (Sync Engine)
-        window.addEventListener('online', updateNetworkStatus);
-        window.addEventListener('offline', updateNetworkStatus);
-
-        function updateNetworkStatus() {
-            const dot = document.getElementById('net-dot');
-            const text = document.getElementById('net-text');
-            if(navigator.onLine) {
-                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-                text.innerText = "ONLINE";
-                processPendingSync();
-            } else {
-                dot.className = "w-2 h-2 rounded-full bg-rose-500";
-                text.innerText = "OFFLINE";
-            }
-        }
 
         const questions = {
             anak: {
@@ -188,12 +157,14 @@
                         <div class="bg-white/50 dark:bg-slate-800/50 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 border border-white/20 hover:border-blue-300 transition-all">
                             <p class="text-sm flex-1"><span class="font-bold text-blue-500 mr-2">${i+1}.</span> ${q}</p>
                             <div class="flex gap-2 w-full md:w-auto">
-                                ${[1, 0].map(v => `
-                                    <label class="flex-1 md:w-20 cursor-pointer">
-                                        <input type="radio" name="${type}${i}" value="${v}" onchange="updateProgress()" class="hidden radio-custom">
-                                        <div class="radio-label text-center py-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 text-xs font-bold transition-all">${v?'Ya':'Tidak'}</div>
-                                    </label>
-                                `).join('')}
+                                <label class="flex-1 md:w-20 cursor-pointer">
+                                    <input type="radio" name="${type}${i}" value="1" onchange="updateProgress()" class="hidden radio-custom">
+                                    <div class="radio-label text-center py-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 text-xs font-bold transition-all">Ya</div>
+                                </label>
+                                <label class="flex-1 md:w-20 cursor-pointer">
+                                    <input type="radio" name="${type}${i}" value="0" onchange="updateProgress()" class="hidden radio-custom">
+                                    <div class="radio-label text-center py-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 text-xs font-bold transition-all">Tidak</div>
+                                </label>
                             </div>
                         </div>
                     `;
@@ -204,7 +175,12 @@
         }
 
         function updateProgress() {
-            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            let answered = 0;
+            ['A', 'B'].forEach(type => {
+                for(let i=0; i<3; i++) {
+                    if(document.querySelector(`input[name="${type}${i}"]:checked`)) answered++;
+                }
+            });
             const pct = Math.round((answered/6)*100);
             document.getElementById('progress-bar').style.width = pct + '%';
             document.getElementById('progress-text').innerText = `Progres: ${pct}%`;
@@ -212,32 +188,67 @@
         }
 
         async function prosesSkoring() {
-            const answered = document.querySelectorAll('input[type="radio"]:checked');
-            if(answered.length < 6) return Swal.fire('Belum Lengkap', 'Jawab semua pertanyaan dulu', 'warning');
+            let belumDiisi = [];
+            ['A', 'B'].forEach(type => {
+                const namaSkala = type === 'A' ? 'Ansietas' : 'Depresi';
+                for(let i=0; i<3; i++) {
+                    if(!document.querySelector(`input[name="${type}${i}"]:checked`)) {
+                        belumDiisi.push(`Skala ${namaSkala} No. ${i+1}`);
+                    }
+                }
+            });
+
+            if(belumDiisi.length > 0) {
+                return Swal.fire({
+                    title: 'Belum Lengkap!',
+                    html: `<div class="text-left text-sm p-2 text-rose-600 font-semibold">Silakan isi soal berikut:<br>• ${belumDiisi.join('<br>• ')}</div>`,
+                    icon: 'warning'
+                });
+            }
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
             btn.innerHTML = `<span class="animate-spin mr-2">🌀</span> Memproses Skor...`;
 
-            const getScore = (p) => [0,1,2].reduce((t,i) => t + parseInt(document.querySelector(`input[name="${p}${i}"]:checked`).value), 0);
-            const scoreA = getScore('A'), scoreB = getScore('B');
-
-            const data = {
-                id: `MMYS-${Date.now()}-${document.getElementById('initNama').value.substring(0,3).toUpperCase()}`,
-                nama: document.getElementById('initNama').value,
-                usia: document.getElementById('initUsia').value,
-                tanggal: new Date().toLocaleDateString('id-ID'),
-                scoreA, scoreB,
-                interA: interpret(scoreA),
-                interB: interpret(scoreB),
-                status: 'pending'
+            const getScore = (p) => {
+                let total = 0;
+                for(let i=0; i<3; i++) {
+                    const el = document.querySelector(`input[name="${p}${i}"]:checked`);
+                    if(el) total += parseInt(el.value);
+                }
+                return total;
             };
 
-            setTimeout(() => {
+            try {
+                const scoreA = getScore('A');
+                const scoreB = getScore('B');
+
+                const data = {
+                    id: `MMYS-${Date.now()}-${document.getElementById('initNama').value.substring(0,3).toUpperCase()}`,
+                    nama: document.getElementById('initNama').value,
+                    usia: document.getElementById('initUsia').value,
+                    tanggal: new Date().toLocaleDateString('id-ID'),
+                    scoreA, scoreB,
+                    interA: interpret(scoreA),
+                    interB: interpret(scoreB),
+                    status: 'pending'
+                };
+
                 displayResult(data);
                 saveLocally(data);
                 syncToSheets(data);
-            }, 800);
+
+            } catch (error) {
+                console.error("Internal Crash Log: ", error);
+                Swal.fire({
+                    title: 'Error Pemrosesan',
+                    text: `Detail Masalah: ${error.message}. Periksa konsol F12 browser.`,
+                    icon: 'error'
+                });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `Kirim & Lihat Analisis`;
+            }
         }
 
         function interpret(s) {
@@ -261,22 +272,35 @@
             document.getElementById('scoreDep').innerText = `Skor: ${d.scoreB}/3`;
             document.getElementById('boxDepresi').className = `p-6 rounded-2xl border-2 transition-all ${d.interB.color}`;
 
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: d.id, width: 80, height: 80 });
+            // Reset wadah qr sebelum generate baru
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            
+            if (typeof QRCode !== "undefined") {
+                new QRCode(qrContainer, { text: d.id, width: 80, height: 80 });
+            } else {
+                console.error("Library QRCode CDN belum terload sepenuhnya.");
+            }
 
             document.getElementById('main-form').classList.add('hidden');
             document.getElementById('result-section').classList.remove('hidden');
         }
 
         function saveLocally(data) {
-            let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-            history.unshift(data);
-            localStorage.setItem('mmys_history', JSON.stringify(history.slice(0, 100)));
+            try {
+                let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+                // Membersihkan data corrupt versi lawas jika ada struktur objek yang berbeda
+                if(history.length > 0 && typeof history[0].interA === 'string') {
+                    history = [];
+                }
+                history.unshift(data);
+                localStorage.setItem('mmys_history', JSON.stringify(history.slice(0, 100)));
+            } catch(e) {
+                console.error("Gagal menyimpan riwayat lokal: ", e);
+            }
         }
 
-        // AMAN & SELARAS: Menggunakan format data text/plain stream untuk bypass CORS Google Apps Script secara andal
         async function syncToSheets(data) {
-            if(!navigator.onLine) return;
             try {
                 const response = await fetch(SHEETS_URL, { 
                     method: 'POST', 
@@ -288,34 +312,43 @@
                 if (result.status === "success") {
                     updateSyncUI(data.id);
                 }
-            } catch (e) { console.log('Koneksi terhambat, data disimpan sementara di memori lokal.'); }
+            } catch (e) { 
+                console.log('Koneksi sibuk / cloud belum tersinkronisasi. Data aman di lokal.'); 
+            }
         }
 
         function updateSyncUI(id) {
             const status = document.getElementById('sync-status');
-            status.innerText = "Synced to Cloud";
-            status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
-            
-            let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-            const idx = history.findIndex(h => h.id === id);
-            if(idx !== -1) { history[idx].status = 'synced'; localStorage.setItem('mmys_history', JSON.stringify(history)); }
-        }
-
-        function processPendingSync() {
-            let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-            history.filter(h => h.status === 'pending').forEach(h => syncToSheets(h));
+            if(status) {
+                status.innerText = "Synced to Cloud";
+                status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
+            }
+            try {
+                let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+                const idx = history.findIndex(h => h.id === id);
+                if(idx !== -1) { 
+                    history[idx].status = 'synced'; 
+                    localStorage.setItem('mmys_history', JSON.stringify(history)); 
+                }
+            } catch(e) {}
         }
 
         function showHistory() {
-            const history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-            if(!history.length) return Swal.fire('Kosong', 'Belum ada riwayat', 'info');
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+            } catch(e) { history = []; }
+
+            if(!history.length || typeof history[0].interA === 'string') {
+                return Swal.fire('Kosong', 'Belum ada riwayat baru yang tersimpan', 'info');
+            }
             
             const list = history.map(h => `
                 <div class="flex justify-between items-center p-3 border-b text-xs text-left">
                     <div><b>${h.nama}</b><br><span class="opacity-50">${h.tanggal}</span></div>
                     <div class="flex gap-1">
-                        <span class="px-2 py-1 rounded ${h.interA.color.split(' ')[0]} border">A:${h.scoreA}</span>
-                        <span class="px-2 py-1 rounded ${h.interB.color.split(' ')[0]} border">D:${h.scoreB}</span>
+                        <span class="px-2 py-1 rounded ${h.interA && h.interA.color ? h.interA.color.split(' ')[0] : 'bg-slate-100'} border">A:${h.scoreA}</span>
+                        <span class="px-2 py-1 rounded ${h.interB && h.interB.color ? h.interB.color.split(' ')[0] : 'bg-slate-100'} border">D:${h.scoreB}</span>
                     </div>
                 </div>
             `).join('');
@@ -332,18 +365,21 @@
 
         function exportToExcel() {
             if(!lastResult) return;
-            const ws = XLSX.utils.json_to_sheet([lastResult]);
+            const exportData = {
+                "ID Transaksi": lastResult.id,
+                "Nama Peserta": lastResult.nama,
+                "Usia": lastResult.usia,
+                "Tanggal Skrining": lastResult.tanggal,
+                "Skor Ansietas": lastResult.scoreA,
+                "Kesimpulan Ansietas": lastResult.interA.text,
+                "Skor Depresi": lastResult.scoreB,
+                "Kesimpulan Depresi": lastResult.interB.text
+            };
+            const ws = XLSX.utils.json_to_sheet([exportData]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "MMYS_Data");
             XLSX.writeFile(wb, `MMYS_${lastResult.nama}.xlsx`);
         }
-
-        setInterval(processPendingSync, 10000);
-
-        if('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-        }
     </script>
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
 </body>
 </html>
