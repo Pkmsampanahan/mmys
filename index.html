@@ -24,7 +24,7 @@
 </head>
 <body class="p-4 md:p-8 flex justify-center items-start">
 
-    <!-- Tombol Navigasi Atas -->
+    <!-- Navigasi Atas -->
     <div class="fixed top-4 right-4 flex gap-2 no-print z-50">
         <button onclick="showRekapanModal()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan Data</button>
         <button onclick="toggleDarkMode()" class="p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
@@ -32,7 +32,7 @@
 
     <div id="app" class="w-full max-w-4xl glass rounded-[32px] p-6 md:p-10 relative overflow-hidden shadow-2xl">
         
-        <!-- Landing Page / Menu Utama -->
+        <!-- Landing Page -->
         <div id="step-landing" class="text-center py-10 animate-fade">
             <div class="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
                 Versi 1.2 PRO • Cloud Direct
@@ -131,7 +131,7 @@
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
         let currentMode = '', lastResult = null;
 
-        // Membersihkan localStorage otomatis jika masih ada dari versi lama
+        // Bersihkan cache localStorage versi lama
         try { localStorage.clear(); } catch(e) {}
 
         document.getElementById('initNama').addEventListener('input', function(e) {
@@ -324,7 +324,7 @@
             }
         }
 
-        /* --- FITUR REKAPAN DATA DIREK MENGAMBIL DARI GOOGLE SHEETS --- */
+        /* --- MENAMPILKAN REKAPAN DATA DENGAN TIMEOUT 10 DETIK --- */
         async function showRekapanModal() {
             Swal.fire({
                 title: 'Mengambil Data...',
@@ -336,7 +336,13 @@
             let history = [];
 
             try {
-                const res = await fetch(SHEETS_URL);
+                // Batas Timeout 10 Detik
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+                const res = await fetch(SHEETS_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
                 const cloudData = await res.json();
 
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
@@ -372,7 +378,10 @@
                     });
                 }
             } catch (err) {
-                return Swal.fire('Error Koneksi', 'Gagal mengambil data dari Google Sheet. Periksa jaringan internet.', 'error');
+                if (err.name === 'AbortError') {
+                    return Swal.fire('Koneksi Lambat', 'Waktu permintaan habis (Timeout 10 detik). Silakan coba klik tombol rekapan sekali lagi.', 'warning');
+                }
+                return Swal.fire('Error Koneksi', 'Gagal mengambil data dari Google Sheet.', 'error');
             }
 
             if(!history.length) {
