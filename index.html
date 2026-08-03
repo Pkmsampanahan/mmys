@@ -24,13 +24,16 @@
 </head>
 <body class="p-4 md:p-8 flex justify-center items-start">
 
+    <!-- Tombol Navigasi Atas -->
     <div class="fixed top-4 right-4 flex gap-2 no-print z-50">
+        <button onclick="showRekapanModal()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan Data</button>
         <button onclick="showHistory()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold">📜 Riwayat</button>
         <button onclick="toggleDarkMode()" class="p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
     </div>
 
     <div id="app" class="w-full max-w-4xl glass rounded-[32px] p-6 md:p-10 relative overflow-hidden shadow-2xl">
         
+        <!-- Landing Page -->
         <div id="step-landing" class="text-center py-10 animate-fade">
             <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">MMYS V.1 <span class="text-blue-500">PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-8 italic">Puskesmas Sampanahan Digital Ecosystem</p>
@@ -47,9 +50,13 @@
                 <button onclick="checkAutoMode()" id="btnStart" class="w-full mt-4 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg flex justify-center items-center gap-2">
                     Mulai Skrining Sekarang
                 </button>
+                <button onclick="showRekapanModal()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
+                    📊 Lihat Rekapan Hasil Form
+                </button>
             </div>
         </div>
 
+        <!-- Main Form -->
         <div id="main-form" class="hidden animate-fade">
             <div class="mb-6 no-print">
                 <div class="flex justify-between text-xs font-bold text-blue-600 mb-2 uppercase tracking-widest">
@@ -70,6 +77,7 @@
             </div>
         </div>
 
+        <!-- Result Section -->
         <div id="result-section" class="hidden animate-fade pt-4">
             <div class="flex justify-between items-center no-print mb-6">
                 <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600">← Kembali</button>
@@ -272,7 +280,6 @@
             document.getElementById('scoreDep').innerText = `Skor: ${d.scoreB}/3`;
             document.getElementById('boxDepresi').className = `p-6 rounded-2xl border-2 transition-all ${d.interB.color}`;
 
-            // Reset wadah qr sebelum generate baru
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = "";
             
@@ -289,7 +296,6 @@
         function saveLocally(data) {
             try {
                 let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-                // Membersihkan data corrupt versi lawas jika ada struktur objek yang berbeda
                 if(history.length > 0 && typeof history[0].interA === 'string') {
                     history = [];
                 }
@@ -361,6 +367,150 @@
             }).then(res => {
                 if(res.isDenied) { localStorage.removeItem('mmys_history'); location.reload(); }
             });
+        }
+
+        /* --- FITUR REKAPAN DATA DARI GOOGLE SHEETS & LOCAL --- */
+        async function showRekapanModal() {
+            Swal.fire({
+                title: 'Mengambil Data...',
+                text: 'Sedang menghubungkan ke Google Sheet',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            let history = [];
+
+            try {
+                // Tarik data dari Google Sheet via GET
+                const res = await fetch(SHEETS_URL);
+                const cloudData = await res.json();
+
+                if (Array.isArray(cloudData) && cloudData.length > 0) {
+                    history = cloudData.map(d => ({
+                        id: d.id || d['ID Transaksi'] || '-',
+                        nama: d.nama || d['Nama Peserta'] || '-',
+                        usia: d.usia || d['Usia'] || '-',
+                        tanggal: d.tanggal || d['Tanggal Skrining'] || '-',
+                        scoreA: parseInt(d.scoreA ?? d['Skor Ansietas'] ?? 0),
+                        scoreB: parseInt(d.scoreB ?? d['Skor Depresi'] ?? 0),
+                        interA: interpret(parseInt(d.scoreA ?? d['Skor Ansietas'] ?? 0)),
+                        interB: interpret(parseInt(d.scoreB ?? d['Skor Depresi'] ?? 0))
+                    }));
+                }
+            } catch (err) {
+                console.warn('Gagal ambil data Sheet, menggunakan data lokal...', err);
+            }
+
+            // Jika gagal ambil dari sheet/kosong, fallback ambil dari localStorage
+            if (!history.length) {
+                try {
+                    history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
+                } catch(e) { history = []; }
+            }
+
+            if(!history.length) {
+                return Swal.fire('Rekapan Kosong', 'Belum ada data pengisian form baik di Sheet maupun lokal.', 'info');
+            }
+
+            // Hitung Ringkasan Statistik
+            const totalPeserta = history.length;
+            let anxNormal = 0, anxRingan = 0, anxBerat = 0;
+            let depNormal = 0, depRingan = 0, depBerat = 0;
+
+            history.forEach(h => {
+                if(h.scoreA >= 2) anxBerat++;
+                else if(h.scoreA === 1) anxRingan++;
+                else anxNormal++;
+
+                if(h.scoreB >= 2) depBerat++;
+                else if(h.scoreB === 1) depRingan++;
+                else depNormal++;
+            });
+
+            // Format Tabel
+            const rows = history.map((h, i) => `
+                <tr class="border-b text-left text-xs hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td class="p-2 font-bold">${i+1}</td>
+                    <td class="p-2">${h.nama}</td>
+                    <td class="p-2">${h.usia} th</td>
+                    <td class="p-2 text-[10px] opacity-75">${h.tanggal}</td>
+                    <td class="p-2 font-semibold ${h.scoreA >= 2 ? 'text-rose-600' : h.scoreA === 1 ? 'text-amber-600' : 'text-emerald-600'}">${h.scoreA} (${h.interA ? h.interA.text : '-'})</td>
+                    <td class="p-2 font-semibold ${h.scoreB >= 2 ? 'text-rose-600' : h.scoreB === 1 ? 'text-amber-600' : 'text-emerald-600'}">${h.scoreB} (${h.interB ? h.interB.text : '-'})</td>
+                </tr>
+            `).join('');
+
+            const contentHtml = `
+                <div class="text-left space-y-4">
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="p-3 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-200">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Total Peserta</p>
+                            <p class="text-xl font-black text-blue-600">${totalPeserta}</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 dark:bg-slate-800 rounded-xl border border-amber-200">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Ansietas Berat</p>
+                            <p class="text-xl font-black text-rose-600">${anxBerat}</p>
+                            <p class="text-[9px] text-slate-400">Ringan: ${anxRingan} | Normal: ${anxNormal}</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 dark:bg-slate-800 rounded-xl border border-purple-200">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Depresi Berat</p>
+                            <p class="text-xl font-black text-rose-600">${depBerat}</p>
+                            <p class="text-[9px] text-slate-400">Ringan: ${depRingan} | Normal: ${depNormal}</p>
+                        </div>
+                    </div>
+
+                    <div class="max-h-64 overflow-y-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase sticky top-0">
+                                <tr>
+                                    <th class="p-2">#</th>
+                                    <th class="p-2">Nama</th>
+                                    <th class="p-2">Usia</th>
+                                    <th class="p-2">Tanggal</th>
+                                    <th class="p-2">Ansietas</th>
+                                    <th class="p-2">Depresi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: '📊 Rekapan Hasil Skrining Form',
+                html: contentHtml,
+                width: '700px',
+                showCancelButton: true,
+                confirmButtonText: '📥 Export Semua ke Excel',
+                cancelButtonText: 'Tutup',
+                confirmButtonColor: '#059669'
+            }).then(res => {
+                if(res.isConfirmed) {
+                    exportAllToExcel(history);
+                }
+            });
+        }
+
+        function exportAllToExcel(dataList) {
+            if(!dataList || !dataList.length) return;
+            const exportRows = dataList.map((d, i) => ({
+                "No": i + 1,
+                "ID Transaksi": d.id,
+                "Nama Peserta": d.nama,
+                "Usia": d.usia,
+                "Tanggal Skrining": d.tanggal,
+                "Skor Ansietas": d.scoreA,
+                "Kesimpulan Ansietas": d.interA ? d.interA.text : '',
+                "Skor Depresi": d.scoreB,
+                "Kesimpulan Depresi": d.interB ? d.interB.text : ''
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rekapan_MMYS");
+            XLSX.writeFile(wb, `Rekapan_Skrining_MMYS_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
         function exportToExcel() {
