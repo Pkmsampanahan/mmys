@@ -33,7 +33,7 @@
 
     <div id="app" class="w-full max-w-4xl glass rounded-[32px] p-6 md:p-10 relative overflow-hidden shadow-2xl">
         
-        <!-- Landing Page -->
+        <!-- Landing Page / Menu Utama -->
         <div id="step-landing" class="text-center py-10 animate-fade">
             <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">MMYS V.1 <span class="text-blue-500">PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-8 italic">Puskesmas Sampanahan Digital Ecosystem</p>
@@ -42,6 +42,10 @@
                 <div class="flex flex-col gap-2">
                     <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Nama Peserta</label>
                     <input type="text" id="initNama" placeholder="Hanya huruf..." class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Asal Sekolah / Madrasah</label>
+                    <input type="text" id="initSekolah" placeholder="Contoh: SMPN 1 Sampanahan" class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Usia (7-18 Tahun)</label>
@@ -92,9 +96,10 @@
                 
                 <div class="grid grid-cols-2 gap-4 mb-8 text-sm p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
                     <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
+                    <p><span class="opacity-60">Asal Sekolah:</span> <b id="resSekolah"></b></p>
                     <p><span class="opacity-60">Usia:</span> <b id="resUsia"></b> th</p>
                     <p><span class="opacity-60">Tanggal:</span> <b id="resTgl"></b></p>
-                    <p><span class="opacity-60">ID Transaksi:</span> <b id="resID" class="text-[10px] font-mono"></b></p>
+                    <p class="col-span-2"><span class="opacity-60">ID Transaksi:</span> <b id="resID" class="text-[10px] font-mono"></b></p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6 text-left">
@@ -121,7 +126,7 @@
     </div>
 
     <script>
-        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
+        const SHEETS_URL = 'MASUKKAN_URL_WEB_APP_ANDA_DISINI'; // Ganti dengan URL /exec Google Apps Script Anda
         let currentMode = '', lastResult = null;
 
         document.getElementById('initNama').addEventListener('input', function(e) {
@@ -143,8 +148,10 @@
 
         function checkAutoMode() {
             const nama = document.getElementById('initNama').value.trim();
+            const sekolah = document.getElementById('initSekolah').value.trim();
             const usia = parseInt(document.getElementById('initUsia').value);
-            if(!nama || isNaN(usia)) return Swal.fire('Error', 'Lengkapi data terlebih dahulu', 'error');
+            
+            if(!nama || !sekolah || isNaN(usia)) return Swal.fire('Error', 'Harap lengkapi Nama, Asal Sekolah, dan Usia terlebih dahulu', 'error');
             if(usia < 7 || usia > 18) return Swal.fire('Error', 'Usia harus 7-18 tahun', 'warning');
             
             currentMode = (usia <= 9) ? 'anak' : 'remaja';
@@ -234,6 +241,7 @@
                 const data = {
                     id: `MMYS-${Date.now()}-${document.getElementById('initNama').value.substring(0,3).toUpperCase()}`,
                     nama: document.getElementById('initNama').value,
+                    sekolah: document.getElementById('initSekolah').value,
                     usia: document.getElementById('initUsia').value,
                     tanggal: new Date().toLocaleDateString('id-ID'),
                     scoreA, scoreB,
@@ -268,6 +276,7 @@
         function displayResult(d) {
             lastResult = d;
             document.getElementById('resNama').innerText = d.nama;
+            document.getElementById('resSekolah').innerText = d.sekolah;
             document.getElementById('resUsia').innerText = d.usia;
             document.getElementById('resTgl').innerText = d.tanggal;
             document.getElementById('resID').innerText = d.id;
@@ -285,8 +294,6 @@
             
             if (typeof QRCode !== "undefined") {
                 new QRCode(qrContainer, { text: d.id, width: 80, height: 80 });
-            } else {
-                console.error("Library QRCode CDN belum terload sepenuhnya.");
             }
 
             document.getElementById('main-form').classList.add('hidden');
@@ -301,25 +308,20 @@
                 }
                 history.unshift(data);
                 localStorage.setItem('mmys_history', JSON.stringify(history.slice(0, 100)));
-            } catch(e) {
-                console.error("Gagal menyimpan riwayat lokal: ", e);
-            }
+            } catch(e) {}
         }
 
         async function syncToSheets(data) {
             try {
-                const response = await fetch(SHEETS_URL, { 
+                await fetch(SHEETS_URL, { 
                     method: 'POST', 
                     mode: 'cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(data) 
                 });
-                const result = await response.json();
-                if (result.status === "success") {
-                    updateSyncUI(data.id);
-                }
+                updateSyncUI(data.id);
             } catch (e) { 
-                console.log('Koneksi sibuk / cloud belum tersinkronisasi. Data aman di lokal.'); 
+                console.log('Koneksi sibuk / cloud belum tersinkronisasi.'); 
             }
         }
 
@@ -329,47 +331,8 @@
                 status.innerText = "Synced to Cloud";
                 status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
             }
-            try {
-                let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-                const idx = history.findIndex(h => h.id === id);
-                if(idx !== -1) { 
-                    history[idx].status = 'synced'; 
-                    localStorage.setItem('mmys_history', JSON.stringify(history)); 
-                }
-            } catch(e) {}
         }
 
-        function showHistory() {
-            let history = [];
-            try {
-                history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-            } catch(e) { history = []; }
-
-            if(!history.length || typeof history[0].interA === 'string') {
-                return Swal.fire('Kosong', 'Belum ada riwayat baru yang tersimpan', 'info');
-            }
-            
-            const list = history.map(h => `
-                <div class="flex justify-between items-center p-3 border-b text-xs text-left">
-                    <div><b>${h.nama}</b><br><span class="opacity-50">${h.tanggal}</span></div>
-                    <div class="flex gap-1">
-                        <span class="px-2 py-1 rounded ${h.interA && h.interA.color ? h.interA.color.split(' ')[0] : 'bg-slate-100'} border">A:${h.scoreA}</span>
-                        <span class="px-2 py-1 rounded ${h.interB && h.interB.color ? h.interB.color.split(' ')[0] : 'bg-slate-100'} border">D:${h.scoreB}</span>
-                    </div>
-                </div>
-            `).join('');
-            
-            Swal.fire({
-                title: 'Riwayat 100 Data Terakhir',
-                html: `<div class="max-h-80 overflow-y-auto">${list}</div>`,
-                showDenyButton: true,
-                denyButtonText: 'Hapus Riwayat'
-            }).then(res => {
-                if(res.isDenied) { localStorage.removeItem('mmys_history'); location.reload(); }
-            });
-        }
-
-        /* --- FITUR REKAPAN DATA DARI GOOGLE SHEETS & LOCAL --- */
         async function showRekapanModal() {
             Swal.fire({
                 title: 'Mengambil Data...',
@@ -381,27 +344,38 @@
             let history = [];
 
             try {
-                // Tarik data dari Google Sheet via GET
                 const res = await fetch(SHEETS_URL);
                 const cloudData = await res.json();
 
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
-                    history = cloudData.map(d => ({
-                        id: d.id || d['ID Transaksi'] || '-',
-                        nama: d.nama || d['Nama Peserta'] || '-',
-                        usia: d.usia || d['Usia'] || '-',
-                        tanggal: d.tanggal || d['Tanggal Skrining'] || '-',
-                        scoreA: parseInt(d.scoreA ?? d['Skor Ansietas'] ?? 0),
-                        scoreB: parseInt(d.scoreB ?? d['Skor Depresi'] ?? 0),
-                        interA: interpret(parseInt(d.scoreA ?? d['Skor Ansietas'] ?? 0)),
-                        interB: interpret(parseInt(d.scoreB ?? d['Skor Depresi'] ?? 0))
-                    }));
+                    history = cloudData.map(d => {
+                        const values = Object.values(d);
+                        const idVal = d['ID Transaksi'] || d['id'] || values[0] || '-';
+                        const namaVal = d['Nama Peserta'] || d['nama'] || values[1] || '-';
+                        const sekolahVal = d['Asal Sekolah'] || d['sekolah'] || values[2] || '-';
+                        const usiaVal = d['Usia'] || d['usia'] || values[3] || '-';
+                        const tglVal = d['Tanggal Skrining'] || d['tanggal'] || values[4] || '-';
+                        
+                        const scoreAVal = parseInt(d['Skor Ansietas'] ?? d['scoreA'] ?? values[5] ?? 0);
+                        const scoreBVal = parseInt(d['Skor Depresi'] ?? d['scoreB'] ?? values[7] ?? 0);
+
+                        return {
+                            id: idVal,
+                            nama: namaVal,
+                            sekolah: sekolahVal,
+                            usia: usiaVal,
+                            tanggal: tglVal,
+                            scoreA: isNaN(scoreAVal) ? 0 : scoreAVal,
+                            scoreB: isNaN(scoreBVal) ? 0 : scoreBVal,
+                            interA: interpret(isNaN(scoreAVal) ? 0 : scoreAVal),
+                            interB: interpret(isNaN(scoreBVal) ? 0 : scoreBVal)
+                        };
+                    });
                 }
             } catch (err) {
                 console.warn('Gagal ambil data Sheet, menggunakan data lokal...', err);
             }
 
-            // Jika gagal ambil dari sheet/kosong, fallback ambil dari localStorage
             if (!history.length) {
                 try {
                     history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
@@ -412,26 +386,20 @@
                 return Swal.fire('Rekapan Kosong', 'Belum ada data pengisian form baik di Sheet maupun lokal.', 'info');
             }
 
-            // Hitung Ringkasan Statistik
             const totalPeserta = history.length;
             let anxNormal = 0, anxRingan = 0, anxBerat = 0;
             let depNormal = 0, depRingan = 0, depBerat = 0;
 
             history.forEach(h => {
-                if(h.scoreA >= 2) anxBerat++;
-                else if(h.scoreA === 1) anxRingan++;
-                else anxNormal++;
-
-                if(h.scoreB >= 2) depBerat++;
-                else if(h.scoreB === 1) depRingan++;
-                else depNormal++;
+                if(h.scoreA >= 2) anxBerat++; else if(h.scoreA === 1) anxRingan++; else anxNormal++;
+                if(h.scoreB >= 2) depBerat++; else if(h.scoreB === 1) depRingan++; else depNormal++;
             });
 
-            // Format Tabel
             const rows = history.map((h, i) => `
                 <tr class="border-b text-left text-xs hover:bg-slate-50 dark:hover:bg-slate-700">
                     <td class="p-2 font-bold">${i+1}</td>
-                    <td class="p-2">${h.nama}</td>
+                    <td class="p-2 font-medium">${h.nama}</td>
+                    <td class="p-2 text-blue-600 dark:text-blue-400 font-semibold">${h.sekolah}</td>
                     <td class="p-2">${h.usia} th</td>
                     <td class="p-2 text-[10px] opacity-75">${h.tanggal}</td>
                     <td class="p-2 font-semibold ${h.scoreA >= 2 ? 'text-rose-600' : h.scoreA === 1 ? 'text-amber-600' : 'text-emerald-600'}">${h.scoreA} (${h.interA ? h.interA.text : '-'})</td>
@@ -464,6 +432,7 @@
                                 <tr>
                                     <th class="p-2">#</th>
                                     <th class="p-2">Nama</th>
+                                    <th class="p-2">Sekolah</th>
                                     <th class="p-2">Usia</th>
                                     <th class="p-2">Tanggal</th>
                                     <th class="p-2">Ansietas</th>
@@ -481,15 +450,13 @@
             Swal.fire({
                 title: '📊 Rekapan Hasil Skrining Form',
                 html: contentHtml,
-                width: '700px',
+                width: '800px',
                 showCancelButton: true,
                 confirmButtonText: '📥 Export Semua ke Excel',
                 cancelButtonText: 'Tutup',
                 confirmButtonColor: '#059669'
             }).then(res => {
-                if(res.isConfirmed) {
-                    exportAllToExcel(history);
-                }
+                if(res.isConfirmed) { exportAllToExcel(history); }
             });
         }
 
@@ -499,6 +466,7 @@
                 "No": i + 1,
                 "ID Transaksi": d.id,
                 "Nama Peserta": d.nama,
+                "Asal Sekolah": d.sekolah,
                 "Usia": d.usia,
                 "Tanggal Skrining": d.tanggal,
                 "Skor Ansietas": d.scoreA,
@@ -518,6 +486,7 @@
             const exportData = {
                 "ID Transaksi": lastResult.id,
                 "Nama Peserta": lastResult.nama,
+                "Asal Sekolah": lastResult.sekolah,
                 "Usia": lastResult.usia,
                 "Tanggal Skrining": lastResult.tanggal,
                 "Skor Ansietas": lastResult.scoreA,
