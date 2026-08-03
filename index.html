@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MMYS V.1 Professional - Sistem Skrining Puskesmas</title>
+    <title>MMYS V.1.2 PRO - Sistem Skrining Puskesmas</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -27,7 +27,6 @@
     <!-- Tombol Navigasi Atas -->
     <div class="fixed top-4 right-4 flex gap-2 no-print z-50">
         <button onclick="showRekapanModal()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan Data</button>
-        <button onclick="showHistory()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold">📜 Riwayat</button>
         <button onclick="toggleDarkMode()" class="p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
     </div>
 
@@ -35,8 +34,11 @@
         
         <!-- Landing Page / Menu Utama -->
         <div id="step-landing" class="text-center py-10 animate-fade">
-            <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">MMYS V.1 <span class="text-blue-500">PRO</span></h1>
-            <p class="text-slate-500 dark:text-slate-400 mb-8 italic">Puskesmas Sampanahan Digital Ecosystem</p>
+            <div class="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                Versi 1.2 PRO • Cloud Direct
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS V.1.2 <span class="text-blue-500">PRO</span></h1>
+            <p class="text-slate-500 dark:text-slate-400 mb-8 italic text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
             
             <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-6 rounded-3xl border border-white">
                 <div class="flex flex-col gap-2">
@@ -55,7 +57,7 @@
                     Mulai Skrining Sekarang
                 </button>
                 <button onclick="showRekapanModal()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
-                    📊 Lihat Rekapan Hasil Form
+                    📊 Lihat Rekapan Cloud Sheet
                 </button>
             </div>
         </div>
@@ -86,13 +88,13 @@
             <div class="flex justify-between items-center no-print mb-6">
                 <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600">← Kembali</button>
                 <div class="flex gap-2">
-                    <span id="sync-status" class="text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter">Local Saved</span>
+                    <span id="sync-status" class="text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter">Mengirim ke Cloud...</span>
                     <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">📊 Excel</button>
                 </div>
             </div>
             
             <div id="print-area" class="text-center">
-                <h2 class="font-bold text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS V.1</h2>
+                <h2 class="font-bold text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS V.1.2</h2>
                 
                 <div class="grid grid-cols-2 gap-4 mb-8 text-sm p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
                     <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
@@ -117,7 +119,7 @@
 
                 <div class="mt-8 py-6 border-t border-dashed border-slate-300">
                     <div id="qrcode" class="flex justify-center mb-2"></div>
-                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital</p>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS V.1.2</p>
                 </div>
             </div>
 
@@ -128,6 +130,9 @@
     <script>
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
         let currentMode = '', lastResult = null;
+
+        // Membersihkan localStorage otomatis jika masih ada dari versi lama
+        try { localStorage.clear(); } catch(e) {}
 
         document.getElementById('initNama').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
@@ -246,19 +251,17 @@
                     tanggal: new Date().toLocaleDateString('id-ID'),
                     scoreA, scoreB,
                     interA: interpret(scoreA),
-                    interB: interpret(scoreB),
-                    status: 'pending'
+                    interB: interpret(scoreB)
                 };
 
                 displayResult(data);
-                saveLocally(data);
                 syncToSheets(data);
 
             } catch (error) {
                 console.error("Internal Crash Log: ", error);
                 Swal.fire({
                     title: 'Error Pemrosesan',
-                    text: `Detail Masalah: ${error.message}. Periksa konsol F12 browser.`,
+                    text: `Detail Masalah: ${error.message}`,
                     icon: 'error'
                 });
             } finally {
@@ -300,18 +303,8 @@
             document.getElementById('result-section').classList.remove('hidden');
         }
 
-        function saveLocally(data) {
-            try {
-                let history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-                if(history.length > 0 && typeof history[0].interA === 'string') {
-                    history = [];
-                }
-                history.unshift(data);
-                localStorage.setItem('mmys_history', JSON.stringify(history.slice(0, 100)));
-            } catch(e) {}
-        }
-
         async function syncToSheets(data) {
+            const status = document.getElementById('sync-status');
             try {
                 await fetch(SHEETS_URL, { 
                     method: 'POST', 
@@ -319,36 +312,32 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(data) 
                 });
-                updateSyncUI(data.id);
+                if(status) {
+                    status.innerText = "Synced to Cloud";
+                    status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
+                }
             } catch (e) { 
-                console.log('Koneksi sibuk / cloud belum tersinkronisasi.'); 
+                if(status) {
+                    status.innerText = "Gagal Sync";
+                    status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-rose-100 text-rose-700 font-bold uppercase";
+                }
             }
         }
 
-        function updateSyncUI(id) {
-            const status = document.getElementById('sync-status');
-            if(status) {
-                status.innerText = "Synced to Cloud";
-                status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
-            }
-        }
-
-        /* --- FITUR MENAMPILKAN REKAPAN DATA SINKRON LANSUNG DENGAN GOOGLE SHEETS --- */
+        /* --- FITUR REKAPAN DATA DIREK MENGAMBIL DARI GOOGLE SHEETS --- */
         async function showRekapanModal() {
             Swal.fire({
                 title: 'Mengambil Data...',
-                text: 'Sedang menghubungkan ke Google Sheet',
+                text: 'Menghubungkan langsung ke Google Sheet',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
             let history = [];
-            let fetchedSuccess = false;
 
             try {
                 const res = await fetch(SHEETS_URL);
                 const cloudData = await res.json();
-                fetchedSuccess = true;
 
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
                     history = cloudData.map(d => {
@@ -383,24 +372,11 @@
                     });
                 }
             } catch (err) {
-                console.warn('Gagal koneksi ke Google Sheet.', err);
-            }
-
-            // Jika sukses terhubung ke Google Sheet namun datanya memang KOSONG (berarti data di sheet telah dihapus)
-            if (fetchedSuccess && history.length === 0) {
-                localStorage.removeItem('mmys_history'); // Bersihkan cache lokal lama
-                return Swal.fire('Rekapan Kosong', 'Data di Google Sheet saat ini kosong / telah dihapus.', 'info');
-            }
-
-            // Fallback ke localStorage hanya jika koneksi internet terputus/gagal fetch
-            if (!fetchedSuccess && !history.length) {
-                try {
-                    history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
-                } catch(e) { history = []; }
+                return Swal.fire('Error Koneksi', 'Gagal mengambil data dari Google Sheet. Periksa jaringan internet.', 'error');
             }
 
             if(!history.length) {
-                return Swal.fire('Rekapan Kosong', 'Belum ada data pengisian form.', 'info');
+                return Swal.fire('Rekapan Kosong', 'Tidak ada data di Google Sheet saat ini.', 'info');
             }
 
             const totalPeserta = history.length;
@@ -461,11 +437,12 @@
                             </tbody>
                         </table>
                     </div>
+                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS V.1.2 PRO • Cloud Direct Synchronized</p>
                 </div>
             `;
 
             Swal.fire({
-                title: '📊 Rekapan Hasil Skrining Form',
+                title: '📊 Rekapan Cloud Google Sheet',
                 html: contentHtml,
                 width: '800px',
                 showCancelButton: true,
@@ -495,7 +472,7 @@
             const ws = XLSX.utils.json_to_sheet(exportRows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Rekapan_MMYS");
-            XLSX.writeFile(wb, `Rekapan_Skrining_MMYS_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(wb, `Rekapan_Skrining_MMYS_V1.2_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
         function exportToExcel() {
