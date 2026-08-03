@@ -126,7 +126,6 @@
     </div>
 
     <script>
-        // URL Web App Apps Script milik Anda
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
         let currentMode = '', lastResult = null;
 
@@ -334,7 +333,7 @@
             }
         }
 
-        /* --- FITUR MENAMPILKAN REKAPAN DATA DARI GOOGLE SHEETS --- */
+        /* --- FITUR MENAMPILKAN REKAPAN DATA SINKRON LANSUNG DENGAN GOOGLE SHEETS --- */
         async function showRekapanModal() {
             Swal.fire({
                 title: 'Mengambil Data...',
@@ -344,20 +343,19 @@
             });
 
             let history = [];
+            let fetchedSuccess = false;
 
             try {
                 const res = await fetch(SHEETS_URL);
                 const cloudData = await res.json();
+                fetchedSuccess = true;
 
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
                     history = cloudData.map(d => {
                         const values = Object.values(d);
                         
-                        // Pembacaan fleksibel berdasarkan nama header ATAU urutan posisi kolom
                         const idVal = d['ID Transaksi'] || d['id'] || values[0] || '-';
                         const namaVal = d['Nama Peserta'] || d['nama'] || values[1] || '-';
-                        
-                        // Jika ada kolom sekolah ambil di index 2, jika tidak ada fallback ke '-'
                         const sekolahVal = d['Asal Sekolah'] || d['sekolah'] || (values.length >= 10 ? values[2] : '-');
                         
                         const usiaIdx = values.length >= 10 ? 3 : 2;
@@ -385,17 +383,24 @@
                     });
                 }
             } catch (err) {
-                console.warn('Gagal ambil data Sheet, menggunakan data lokal...', err);
+                console.warn('Gagal koneksi ke Google Sheet.', err);
             }
 
-            if (!history.length) {
+            // Jika sukses terhubung ke Google Sheet namun datanya memang KOSONG (berarti data di sheet telah dihapus)
+            if (fetchedSuccess && history.length === 0) {
+                localStorage.removeItem('mmys_history'); // Bersihkan cache lokal lama
+                return Swal.fire('Rekapan Kosong', 'Data di Google Sheet saat ini kosong / telah dihapus.', 'info');
+            }
+
+            // Fallback ke localStorage hanya jika koneksi internet terputus/gagal fetch
+            if (!fetchedSuccess && !history.length) {
                 try {
                     history = JSON.parse(localStorage.getItem('mmys_history') || '[]');
                 } catch(e) { history = []; }
             }
 
             if(!history.length) {
-                return Swal.fire('Rekapan Kosong', 'Belum ada data pengisian form baik di Sheet maupun lokal.', 'info');
+                return Swal.fire('Rekapan Kosong', 'Belum ada data pengisian form.', 'info');
             }
 
             const totalPeserta = history.length;
