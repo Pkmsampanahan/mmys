@@ -126,7 +126,8 @@
     </div>
 
     <script>
-        const SHEETS_URL = 'MASUKKAN_URL_WEB_APP_ANDA_DISINI'; // Ganti dengan URL /exec Google Apps Script Anda
+        // URL Web App Apps Script milik Anda
+        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
         let currentMode = '', lastResult = null;
 
         document.getElementById('initNama').addEventListener('input', function(e) {
@@ -333,6 +334,7 @@
             }
         }
 
+        /* --- FITUR MENAMPILKAN REKAPAN DATA DARI GOOGLE SHEETS --- */
         async function showRekapanModal() {
             Swal.fire({
                 title: 'Mengambil Data...',
@@ -350,14 +352,24 @@
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
                     history = cloudData.map(d => {
                         const values = Object.values(d);
+                        
+                        // Pembacaan fleksibel berdasarkan nama header ATAU urutan posisi kolom
                         const idVal = d['ID Transaksi'] || d['id'] || values[0] || '-';
                         const namaVal = d['Nama Peserta'] || d['nama'] || values[1] || '-';
-                        const sekolahVal = d['Asal Sekolah'] || d['sekolah'] || values[2] || '-';
-                        const usiaVal = d['Usia'] || d['usia'] || values[3] || '-';
-                        const tglVal = d['Tanggal Skrining'] || d['tanggal'] || values[4] || '-';
                         
-                        const scoreAVal = parseInt(d['Skor Ansietas'] ?? d['scoreA'] ?? values[5] ?? 0);
-                        const scoreBVal = parseInt(d['Skor Depresi'] ?? d['scoreB'] ?? values[7] ?? 0);
+                        // Jika ada kolom sekolah ambil di index 2, jika tidak ada fallback ke '-'
+                        const sekolahVal = d['Asal Sekolah'] || d['sekolah'] || (values.length >= 10 ? values[2] : '-');
+                        
+                        const usiaIdx = values.length >= 10 ? 3 : 2;
+                        const tglIdx = values.length >= 10 ? 4 : 3;
+                        const scoreAIdx = values.length >= 10 ? 5 : 4;
+                        const scoreBIdx = values.length >= 10 ? 7 : 6;
+
+                        const usiaVal = d['Usia'] || d['usia'] || values[usiaIdx] || '-';
+                        const tglVal = d['Tanggal Skrining'] || d['tanggal'] || values[tglIdx] || '-';
+                        
+                        const scoreAVal = parseInt(d['Skor Ansietas'] ?? d['scoreA'] ?? values[scoreAIdx] ?? 0);
+                        const scoreBVal = parseInt(d['Skor Depresi'] ?? d['scoreB'] ?? values[scoreBIdx] ?? 0);
 
                         return {
                             id: idVal,
