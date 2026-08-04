@@ -26,7 +26,7 @@
 
     <!-- Navigasi Atas -->
     <div class="fixed top-4 right-4 flex gap-2 no-print z-50">
-        <button onclick="showRekapanModal()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan Data</button>
+        <button onclick="handleRekapanAccess()" class="p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan Data</button>
         <button onclick="toggleDarkMode()" class="p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
     </div>
 
@@ -35,7 +35,7 @@
         <!-- Landing Page -->
         <div id="step-landing" class="text-center py-10 animate-fade">
             <div class="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-                Versi 1.2 PRO • Cloud Direct
+                Versi 1.2 PRO • Secured Cloud Direct
             </div>
             <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS V.1.2 <span class="text-blue-500">PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-8 italic text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
@@ -56,8 +56,8 @@
                 <button onclick="checkAutoMode()" id="btnStart" class="w-full mt-4 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg flex justify-center items-center gap-2">
                     Mulai Skrining Sekarang
                 </button>
-                <button onclick="showRekapanModal()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
-                    📊 Lihat Rekapan Cloud Sheet
+                <button onclick="handleRekapanAccess()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
+                    🔒 Lihat Rekapan Cloud Sheet
                 </button>
             </div>
         </div>
@@ -129,10 +129,11 @@
 
     <script>
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
-        let currentMode = '', lastResult = null;
+        const REKAPAN_PIN = "1234"; // PIN Akses Rekapan (Dapat diubah sesuai kebutuhan)
 
-        // Bersihkan cache localStorage versi lama
-        try { localStorage.clear(); } catch(e) {}
+        let currentMode = '', lastResult = null;
+        let isRekapanUnlocked = false; // Status Autentikasi PIN
+        let cachedRekapanData = null;  // Tempat penyimpanan sementara data rekapan (Anti-Loading Berulang)
 
         document.getElementById('initNama').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
@@ -144,7 +145,7 @@
                 B: ["Sering sedih/tertekan tanpa sebab jelas.", "Kehilangan minat pada kegiatan yang biasanya disukai.", "Sering capek, sulit tidur, dan sulit fokus belajar."]
             },
             remaja: {
-                A: ["Saya sering merasa khawatir, tegang, atau gelisah terhadap masa depan/hal negatif.", "Saya merasa sulit mengontrol pikiran berlebihan saya.", "Saya sering sulit tidur karena pikiran yang mengganggu."],
+                A: ["Saya sering merasa khawatir, tegang, atau gelisah terhadap masa depan/hal negatif.", "Saya merasa sulit mengontrol pikiran berlebihan saya.", "Saya merasa sulit mengontrol pikiran berlebihan saya."],
                 B: ["Saya merasa sedih, hampa, atau putus asa hampir setiap hari.", "Saya kehilangan minat pada hobi atau teman-teman saya.", "Saya merasa sangat lelah atau tidak berenergi untuk beraktivitas."]
             }
         };
@@ -312,6 +313,12 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(data) 
                 });
+
+                // Jika ada data baru dikirim, tambahkan otomatis ke cache rekapan tanpa reload data ulang dari server
+                if (cachedRekapanData) {
+                    cachedRekapanData.unshift(data);
+                }
+
                 if(status) {
                     status.innerText = "Synced to Cloud";
                     status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
@@ -324,8 +331,66 @@
             }
         }
 
-        /* --- MENAMPILKAN REKAPAN DATA DENGAN TIMEOUT 10 DETIK --- */
+        /* --- LOGIKA AUTENTIKASI PIN SECURITY LOCK & IKON MATA --- */
+        function handleRekapanAccess() {
+            if (isRekapanUnlocked) {
+                showRekapanModal();
+            } else {
+                promptPinLock();
+            }
+        }
+
+        function promptPinLock() {
+            Swal.fire({
+                title: '🔒 Masukkan Kata Sandi',
+                text: 'Akses Rekapan Data Terproteksi',
+                html: `
+                    <div class="relative w-full max-w-xs mx-auto mt-3">
+                        <input type="password" id="pinInput" placeholder="Masukkan PIN..." class="w-full p-3 pr-10 text-center text-lg font-bold border-2 border-slate-300 rounded-xl focus:border-blue-500 outline-none">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 focus:outline-none text-lg">
+                            👁️
+                        </button>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Buka Rekapan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#2563eb',
+                preConfirm: () => {
+                    const pin = document.getElementById('pinInput').value;
+                    if (pin !== REKAPAN_PIN) {
+                        Swal.showValidationMessage('Kata Sandi / PIN Salah!');
+                    }
+                    return pin === REKAPAN_PIN;
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    isRekapanUnlocked = true; // Sesi Terbuka
+                    showRekapanModal();
+                }
+            });
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('pinInput');
+            if (input) {
+                input.type = (input.type === 'password') ? 'text' : 'password';
+            }
+        }
+
+        function lockRekapanSession() {
+            isRekapanUnlocked = false;
+            Swal.fire('Terkunci', 'Sesi rekapan berhasil dikunci kembali.', 'info');
+        }
+
+        /* --- MENAMPILKAN MODAL REKAPAN (SEKALI FETCH & AUTO-UPDATE DATA BARU) --- */
         async function showRekapanModal() {
+            // Jika data sudah ada di cache (pernah diambil), tampilkan langsung tanpa muat ulang
+            if (cachedRekapanData && cachedRekapanData.length > 0) {
+                renderRekapanTableUI(cachedRekapanData);
+                return;
+            }
+
             Swal.fire({
                 title: 'Mengambil Data...',
                 text: 'Menghubungkan langsung ke Google Sheet',
@@ -333,10 +398,7 @@
                 didOpen: () => Swal.showLoading()
             });
 
-            let history = [];
-
             try {
-                // Batas Timeout 10 Detik
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -346,7 +408,7 @@
                 const cloudData = await res.json();
 
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
-                    history = cloudData.map(d => {
+                    cachedRekapanData = cloudData.map(d => {
                         const values = Object.values(d);
                         
                         const idVal = d['ID Transaksi'] || d['id'] || values[0] || '-';
@@ -379,15 +441,20 @@
                 }
             } catch (err) {
                 if (err.name === 'AbortError') {
-                    return Swal.fire('Koneksi Lambat', 'Waktu permintaan habis (Timeout 10 detik). Silakan coba klik tombol rekapan sekali lagi.', 'warning');
+                    return Swal.fire('Koneksi Lambat', 'Waktu permintaan habis (Timeout 10d). Silakan coba lagi.', 'warning');
                 }
                 return Swal.fire('Error Koneksi', 'Gagal mengambil data dari Google Sheet.', 'error');
             }
 
-            if(!history.length) {
+            if (!cachedRekapanData || !cachedRekapanData.length) {
                 return Swal.fire('Rekapan Kosong', 'Tidak ada data di Google Sheet saat ini.', 'info');
             }
 
+            renderRekapanTableUI(cachedRekapanData);
+        }
+
+        /* --- RENDER TABEL & RINGKASAN REKAPAN --- */
+        function renderRekapanTableUI(history) {
             const totalPeserta = history.length;
             let anxNormal = 0, anxRingan = 0, anxBerat = 0;
             let depNormal = 0, depRingan = 0, depBerat = 0;
@@ -411,6 +478,11 @@
 
             const contentHtml = `
                 <div class="text-left space-y-4">
+                    <div class="flex justify-between items-center">
+                        <button onclick="forceRefreshData()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 flex items-center gap-1">🔄 Muat Ulang Data</button>
+                        <button onclick="lockRekapanSession()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">🔒 Kunci / Keluar</button>
+                    </div>
+
                     <div class="grid grid-cols-3 gap-2 text-center text-xs">
                         <div class="p-3 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-200">
                             <p class="text-slate-500 text-[10px] font-bold uppercase">Total Peserta</p>
@@ -461,6 +533,12 @@
             }).then(res => {
                 if(res.isConfirmed) { exportAllToExcel(history); }
             });
+        }
+
+        // Tombol paksa muat ulang data dari server (jika dibutuhkan)
+        function forceRefreshData() {
+            cachedRekapanData = null;
+            showRekapanModal();
         }
 
         function exportAllToExcel(dataList) {
