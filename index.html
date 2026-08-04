@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MMYS V.1.2 PRO - Sistem Skrining Puskesmas</title>
+    <title>MMYS PRO - Sistem Skrining Puskesmas</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -35,9 +35,9 @@
         <!-- Landing Page -->
         <div id="step-landing" class="text-center py-10 animate-fade">
             <div class="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-                Versi 1.2 PRO • Secured Cloud Direct
+                Versi <span class="app-version-tag">V.1.2.2 PRO</span> • Secured Cloud Direct
             </div>
-            <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS V.1.2 <span class="text-blue-500">PRO</span></h1>
+            <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.2 PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-8 italic text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
             
             <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-6 rounded-3xl border border-white">
@@ -94,7 +94,7 @@
             </div>
             
             <div id="print-area" class="text-center">
-                <h2 class="font-bold text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS V.1.2</h2>
+                <h2 class="font-bold text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.2 PRO</span></h2>
                 
                 <div class="grid grid-cols-2 gap-4 mb-8 text-sm p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
                     <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
@@ -119,7 +119,7 @@
 
                 <div class="mt-8 py-6 border-t border-dashed border-slate-300">
                     <div id="qrcode" class="flex justify-center mb-2"></div>
-                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS V.1.2</p>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.2 PRO</span></p>
                 </div>
             </div>
 
@@ -128,12 +128,24 @@
     </div>
 
     <script>
+        // VERSI APLIKASI KLIEN
+        let APP_VERSION = "V.1.2.2 PRO";
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzzhAHpG7xA0BuWe7mSvzn7d3CYo4-sV_Csu5en137gPiuxK22xtl-B5OI3MRFuGlMbLg/exec';
-        const REKAPAN_PIN = "1234"; // PIN Akses Rekapan (Dapat diubah sesuai kebutuhan)
+        const REKAPAN_PIN = "1234"; 
 
         let currentMode = '', lastResult = null;
-        let isRekapanUnlocked = false; // Status Autentikasi PIN
-        let cachedRekapanData = null;  // Tempat penyimpanan sementara data rekapan (Anti-Loading Berulang)
+        let isRekapanUnlocked = false; 
+        let cachedRekapanData = null;  
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateVersionDisplay();
+            try { localStorage.clear(); } catch(e) {}
+        });
+
+        function updateVersionDisplay() {
+            document.querySelectorAll('.app-version-tag').forEach(el => el.innerText = APP_VERSION);
+            document.querySelectorAll('.app-version-title').forEach(el => el.innerText = APP_VERSION);
+        }
 
         document.getElementById('initNama').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
@@ -145,7 +157,7 @@
                 B: ["Sering sedih/tertekan tanpa sebab jelas.", "Kehilangan minat pada kegiatan yang biasanya disukai.", "Sering capek, sulit tidur, dan sulit fokus belajar."]
             },
             remaja: {
-                A: ["Saya sering merasa khawatir, tegang, atau gelisah terhadap masa depan/hal negatif.", "Saya merasa sulit mengontrol pikiran berlebihan saya.", "Saya merasa sulit mengontrol pikiran berlebihan saya."],
+                A: ["Saya sering merasa khawatir, tegang, atau gelisah terhadap masa depan/hal negatif.", "Saya merasa sulit mengontrol pikiran berlebihan saya.", "Saya sering sulit tidur karena pikiran yang mengganggu."],
                 B: ["Saya merasa sedih, hampa, atau putus asa hampir setiap hari.", "Saya kehilangan minat pada hobi atau teman-teman saya.", "Saya merasa sangat lelah atau tidak berenergi untuk beraktivitas."]
             }
         };
@@ -314,7 +326,6 @@
                     body: JSON.stringify(data) 
                 });
 
-                // Jika ada data baru dikirim, tambahkan otomatis ke cache rekapan tanpa reload data ulang dari server
                 if (cachedRekapanData) {
                     cachedRekapanData.unshift(data);
                 }
@@ -331,7 +342,6 @@
             }
         }
 
-        /* --- LOGIKA AUTENTIKASI PIN SECURITY LOCK & IKON MATA --- */
         function handleRekapanAccess() {
             if (isRekapanUnlocked) {
                 showRekapanModal();
@@ -365,7 +375,7 @@
                 }
             }).then(res => {
                 if (res.isConfirmed) {
-                    isRekapanUnlocked = true; // Sesi Terbuka
+                    isRekapanUnlocked = true; 
                     showRekapanModal();
                 }
             });
@@ -383,29 +393,52 @@
             Swal.fire('Terkunci', 'Sesi rekapan berhasil dikunci kembali.', 'info');
         }
 
-        /* --- MENAMPILKAN MODAL REKAPAN (SEKALI FETCH & AUTO-UPDATE DATA BARU) --- */
         async function showRekapanModal() {
-            // Jika data sudah ada di cache (pernah diambil), tampilkan langsung tanpa muat ulang
             if (cachedRekapanData && cachedRekapanData.length > 0) {
                 renderRekapanTableUI(cachedRekapanData);
                 return;
             }
 
             Swal.fire({
-                title: 'Mengambil Data...',
-                text: 'Menghubungkan langsung ke Google Sheet',
+                title: '<span class="text-xl font-bold text-slate-800">Menyingkronkan Data Cloud...</span>',
+                html: '<p class="text-xs text-slate-500 font-medium tracking-wide">Menghubungkan ke Server Database Puskesmas Sampanahan</p>',
                 allowOutsideClick: false,
+                showConfirmButton: false,
                 didOpen: () => Swal.showLoading()
             });
 
             try {
+                // Batas Tunggu Timeout Dinaikkan Menjadi 20 Detik
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
 
                 const res = await fetch(SHEETS_URL, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
-                const cloudData = await res.json();
+                const responseData = await res.json();
+                
+                let cloudData = [];
+                let serverVer = null;
+
+                if (responseData && responseData.data) {
+                    cloudData = responseData.data;
+                    serverVer = responseData.serverVersion;
+                } else if (Array.isArray(responseData)) {
+                    cloudData = responseData;
+                }
+
+                // FITUR OTO-DETECT PERUBAHAN VERSI SERVER
+                if (serverVer && serverVer !== APP_VERSION) {
+                    APP_VERSION = serverVer;
+                    updateVersionDisplay();
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Pembaruan Sistem!',
+                        text: `Aplikasi berhasil diperbarui otomatis ke versi ${serverVer}`,
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
+                }
 
                 if (Array.isArray(cloudData) && cloudData.length > 0) {
                     cachedRekapanData = cloudData.map(d => {
@@ -441,19 +474,18 @@
                 }
             } catch (err) {
                 if (err.name === 'AbortError') {
-                    return Swal.fire('Koneksi Lambat', 'Waktu permintaan habis (Timeout 10d). Silakan coba lagi.', 'warning');
+                    return Swal.fire('Koneksi Lambat', 'Waktu permintaan habis (Timeout 20 detik). Silakan coba lagi.', 'warning');
                 }
-                return Swal.fire('Error Koneksi', 'Gagal mengambil data dari Google Sheet.', 'error');
+                return Swal.fire('Error Koneksi', 'Gagal terhubung ke server database.', 'error');
             }
 
             if (!cachedRekapanData || !cachedRekapanData.length) {
-                return Swal.fire('Rekapan Kosong', 'Tidak ada data di Google Sheet saat ini.', 'info');
+                return Swal.fire('Rekapan Kosong', 'Tidak ada data terdaftar di server saat ini.', 'info');
             }
 
             renderRekapanTableUI(cachedRekapanData);
         }
 
-        /* --- RENDER TABEL & RINGKASAN REKAPAN --- */
         function renderRekapanTableUI(history) {
             const totalPeserta = history.length;
             let anxNormal = 0, anxRingan = 0, anxBerat = 0;
@@ -518,7 +550,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS V.1.2 PRO • Cloud Direct Synchronized</p>
+                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS <span class="app-version-tag">${APP_VERSION}</span> • Cloud Direct Synchronized</p>
                 </div>
             `;
 
@@ -535,7 +567,6 @@
             });
         }
 
-        // Tombol paksa muat ulang data dari server (jika dibutuhkan)
         function forceRefreshData() {
             cachedRekapanData = null;
             showRekapanModal();
@@ -559,7 +590,7 @@
             const ws = XLSX.utils.json_to_sheet(exportRows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Rekapan_MMYS");
-            XLSX.writeFile(wb, `Rekapan_Skrining_MMYS_V1.2_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(wb, `Rekapan_Skrining_MMYS_${APP_VERSION}_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
         function exportToExcel() {
