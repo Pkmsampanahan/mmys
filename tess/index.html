@@ -183,7 +183,7 @@
             this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
         });
 
-        // Helper Normalisasi Nama Sekolah (Menyatukan variasi ejaan lama)
+        // Helper Normalisasi Nama Sekolah
         function normalizeSchoolName(name) {
             if (!name) return '';
             let s = String(name).trim();
@@ -205,7 +205,7 @@
             if (upper.includes('SUNGAI BETUNG')) return 'SDN Sungai Betung';
             if (upper.includes('SAFIR')) return 'SD Swasta Safir';
 
-            return s; // Jika sudah sesuai standar
+            return s;
         }
 
         const questions = {
@@ -525,7 +525,6 @@
         }
 
         function renderRekapanTableUI(history) {
-            // Deduplikasi & Pembersihan Filter Dropdown Sekolah
             const cleanSchools = [...new Set(
                 history
                     .map(h => normalizeSchoolName(h.sekolah))
@@ -601,7 +600,7 @@
 
                     <!-- Tabel Rekapan In-App Responsif -->
                     <div class="table-responsive-custom overflow-x-auto max-h-72 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-inner bg-white dark:bg-slate-900">
-                        <table class="min-w-[800px] w-full text-left border-collapse">
+                        <table class="min-w-[850px] w-full text-left border-collapse">
                             <thead class="bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase sticky top-0 z-20 shadow-sm whitespace-nowrap">
                                 <tr>
                                     <th class="p-3 text-center w-10">#</th>
@@ -613,7 +612,7 @@
                                     <th class="p-3 min-w-[120px]">Skala Ansietas</th>
                                     <th class="p-3 min-w-[120px]">Skala Depresi</th>
                                     <th class="p-3 min-w-[180px]">Rekomendasi Tindak Lanjut</th>
-                                    <th class="p-3 text-center min-w-[90px]">Aksi</th>
+                                    <th class="p-3 text-center min-w-[140px]">Aksi & Kelola</th>
                                 </tr>
                             </thead>
                             <tbody id="rekapanTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -628,7 +627,7 @@
             Swal.fire({
                 title: '📊 Rekapan Data Skrining',
                 html: contentHtml,
-                width: '950px',
+                width: '980px',
                 showCancelButton: true,
                 confirmButtonText: '📥 Export Excel (Standar Puskesmas)',
                 cancelButtonText: 'Tutup',
@@ -760,14 +759,150 @@
                         <td class="p-3 font-semibold whitespace-nowrap ${h.scoreB >= 2 ? 'text-rose-600 font-bold' : h.scoreB === 1 ? 'text-amber-600' : 'text-emerald-600'}">${h.scoreB}/3 (${h.interB ? h.interB.text : '-'})</td>
                         <td class="p-3 text-[11px] font-semibold whitespace-nowrap ${isSevere ? 'text-rose-600' : 'text-slate-600 dark:text-slate-300'}">${h.rekomendasi}</td>
                         <td class="p-3 text-center whitespace-nowrap">
-                            <div class="flex gap-1.5 justify-center">
+                            <div class="flex gap-1 justify-center items-center">
                                 <button onclick="kirimWhatsAppHasil('${safeItem}')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow" title="Kirim WA">💬 WA</button>
                                 <button onclick="lihatDetailPesertaModal('${safeItem}')" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[10px] font-bold shadow" title="Lihat Detail">🔍</button>
+                                <button onclick="editDataPesertaModal('${safeItem}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow" title="Edit Data">✏️</button>
+                                <button onclick="hapusDataPeserta('${h.id}', '${encodeURIComponent(h.nama)}')" class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold shadow" title="Hapus Data">🗑️</button>
                             </div>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        // ================= FITUR EDIT DATA (MODAL & FIREBASE REST SYNC) =================
+        function editDataPesertaModal(safeItemEncoded) {
+            const item = JSON.parse(decodeURIComponent(safeItemEncoded));
+            
+            Swal.fire({
+                title: '✏️ Edit Data Peserta',
+                html: `
+                    <div class="text-left space-y-3 p-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Nama Peserta</label>
+                            <input type="text" id="editNama" value="${item.nama}" class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Asal Sekolah</label>
+                            <input type="text" id="editSekolah" list="schoolOptionsList" value="${item.sekolah}" class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Usia (Tahun)</label>
+                            <input type="number" id="editUsia" value="${item.usia}" class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '💾 Simpan Perubahan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#2563eb',
+                preConfirm: () => {
+                    const newNama = document.getElementById('editNama').value.trim();
+                    const newSekolah = normalizeSchoolName(document.getElementById('editSekolah').value.trim());
+                    const newUsia = parseInt(document.getElementById('editUsia').value);
+
+                    if (!newNama || !newSekolah || isNaN(newUsia)) {
+                        Swal.showValidationMessage('Semua kolom data harus diisi!');
+                        return false;
+                    }
+                    return { newNama, newSekolah, newUsia };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const { newNama, newSekolah, newUsia } = result.value;
+
+                    // Update objek data
+                    const updatedItem = {
+                        ...item,
+                        nama: newNama,
+                        sekolah: newSekolah,
+                        usia: newUsia
+                    };
+
+                    Swal.fire({
+                        title: 'Menyimpan Perubahan...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    try {
+                        const res = await fetch(`${FIREBASE_REST_URL}/${DB_COLLECTION}/${encodeURIComponent(item.id)}.json`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updatedItem)
+                        });
+
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                        // Perbarui data lokal di memori
+                        if (cachedRekapanData) {
+                            const idx = cachedRekapanData.findIndex(x => x.id === item.id);
+                            if (idx !== -1) cachedRekapanData[idx] = updatedItem;
+                        }
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil Diperbarui!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            showRekapanModal();
+                        });
+
+                    } catch (err) {
+                        Swal.fire('Error', `Gagal memperbarui data: ${err.message}`, 'error');
+                    }
+                }
+            });
+        }
+
+        // ================= FITUR HAPUS DATA (FIREBASE REST DELETE) =================
+        function hapusDataPeserta(id, namaEncoded) {
+            const nama = decodeURIComponent(namaEncoded);
+
+            Swal.fire({
+                title: 'Konfirmasi Hapus Data',
+                text: `Apakah Anda yakin ingin menghapus data skrining milik "${nama}"? Data yang terhapus tidak dapat dipulihkan.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '🗑️ Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#e11d48'
+            }).then(async (res) => {
+                if (res.isConfirmed) {
+                    Swal.fire({
+                        title: 'Menghapus Data...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    try {
+                        const delRes = await fetch(`${FIREBASE_REST_URL}/${DB_COLLECTION}/${encodeURIComponent(id)}.json`, {
+                            method: 'DELETE'
+                        });
+
+                        if (!delRes.ok) throw new Error(`HTTP ${delRes.status}`);
+
+                        // Hapus dari cache array lokal
+                        if (cachedRekapanData) {
+                            cachedRekapanData = cachedRekapanData.filter(x => x.id !== id);
+                        }
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Data Berhasil Dihapus!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            showRekapanModal();
+                        });
+
+                    } catch (err) {
+                        Swal.fire('Error', `Gagal menghapus data: ${err.message}`, 'error');
+                    }
+                }
+            });
         }
 
         // Fitur Kirim WhatsApp Otomatis
