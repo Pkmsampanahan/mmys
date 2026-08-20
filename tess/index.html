@@ -69,6 +69,7 @@
                         <option value="MTsS SA Miftahul Khair">
                         <!-- Jenjang SD / MI / Sederajat -->
                         <option value="SDN 1 Gunung Batu Besar">
+                        <option value="SDN 1 Sungai Nyamuk">
                         <option value="SDN 2 Sungai Nyamuk">
                         <option value="SDN Sampanahan">
                         <option value="SDN Sungai Betung">
@@ -200,7 +201,8 @@
             if (upper.includes('MTSS DARUL ULUM')) return 'MTsS Darul Ulum Sukamaju';
             if (upper.includes('MTSS SA MIFTAHUL')) return 'MTsS SA Miftahul Khair';
             if (upper.includes('GUNUNG BATU BESAR')) return 'SDN 1 Gunung Batu Besar';
-            if (upper.includes('SUNGAI NYAMUK')) return 'SDN 2 Sungai Nyamuk';
+            if (upper.includes('SDN 1 SUNGAI NYAMUK') || upper.includes('SD NEGERI 1 SUNGAI NYAMUK')) return 'SDN 1 Sungai Nyamuk';
+            if (upper.includes('SDN 2 SUNGAI NYAMUK') || upper.includes('SD NEGERI 2 SUNGAI NYAMUK')) return 'SDN 2 Sungai Nyamuk';
             if (upper === 'SDN SAMPANAHAN') return 'SDN Sampanahan';
             if (upper.includes('SUNGAI BETUNG')) return 'SDN Sungai Betung';
             if (upper.includes('SAFIR')) return 'SD Swasta Safir';
@@ -523,16 +525,13 @@
                 // 3. Algoritma Anti-Duplikat: Pertahankan hanya 1 data paling baru per siswa di sekolah yang sama
                 const uniqueMap = new Map();
                 parsedList.forEach(item => {
-                    // Buat kunci unik kombinasi nama dan sekolah (case-insensitive)
                     const uniqueKey = `${item.nama.toLowerCase()}_${item.sekolah.toLowerCase()}`;
                     if (!uniqueMap.has(uniqueKey) && item.nama !== '-' && item.nama !== '') {
                         uniqueMap.set(uniqueKey, item);
                     }
                 });
 
-                // Hasil array bersih tanpa duplikasi nama
                 cachedRekapanData = Array.from(uniqueMap.values());
-                
                 renderRekapanTableUI(cachedRekapanData);
 
             } catch (err) {
