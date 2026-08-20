@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMYS PRO - Sistem Skrining Puskesmas</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); --glass-bg: rgba(255, 255, 255, 0.4); --text-main: #1e293b; }
+        .dark { --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --glass-bg: rgba(30, 41, 59, 0.7); --text-main: #f1f5f9; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; transition: background 0.3s ease; }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .animate-fade { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 1; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .radio-custom:checked + .radio-label { background-color: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.05); }
+        @keyframes pulseAlert { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .badge-alert { animation: pulseAlert 1.5s infinite; }
+        
+        /* Custom Scrollbar untuk Tabel HP */
+        .table-responsive-custom::-webkit-scrollbar { height: 6px; width: 6px; }
+        .table-responsive-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark .table-responsive-custom::-webkit-scrollbar-thumb { background: #475569; }
+        
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body class="p-3 md:p-8 flex justify-center items-start">
+
+    <!-- Navigasi Atas -->
+    <div class="fixed top-3 right-3 flex gap-2 no-print z-50">
+        <button onclick="handleRekapanAccess()" class="p-2.5 md:p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan</button>
+        <button onclick="toggleDarkMode()" class="p-2.5 md:p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
+    </div>
+
+    <div id="app" class="w-full max-w-4xl glass rounded-[28px] md:rounded-[32px] p-4 md:p-10 relative overflow-hidden shadow-2xl mt-10 md:mt-0">
+        
+        <!-- Landing Page -->
+        <div id="step-landing" class="text-center py-6 md:py-10 animate-fade">
+            <div class="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                Versi <span class="app-version-tag">V.1.2.2 PRO</span> • Firebase Direct Cloud
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.2 PRO</span></h1>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 md:mb-8 italic text-xs md:text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
+            
+            <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-5 md:p-6 rounded-3xl border border-white">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Nama Peserta</label>
+                    <input type="text" id="initNama" placeholder="Hanya huruf..." class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Asal Sekolah / Madrasah</label>
+                    <input type="text" id="initSekolah" list="schoolOptionsList" placeholder="Pilih atau ketik asal sekolah..." class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
+                    <datalist id="schoolOptionsList">
+                        <!-- Jenjang SMA / MA / Sederajat -->
+                        <option value="SMAN 1 Sampanahan">
+                        <option value="SMAN 2 Sampanahan">
+                        <!-- Jenjang SMP / MTs / Sederajat -->
+                        <option value="SMP Negeri 1 Sampanahan">
+                        <option value="SMP Negeri 2 Sampanahan">
+                        <option value="SMP IT Raudhatul Aminin">
+                        <option value="MTsS Darul Ulum Sukamaju">
+                        <option value="MTsS SA Miftahul Khair">
+                        <!-- Jenjang SD / MI / Sederajat -->
+                        <option value="SDN 1 Gunung Batu Besar">
+                        <option value="SDN 2 Sungai Nyamuk">
+                        <option value="SDN Sampanahan">
+                        <option value="SDN Sungai Betung">
+                        <option value="SD Swasta Safir">
+                        <option value="MIS Raudhatul Aminin">
+                    </datalist>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Usia (7-18 Tahun)</label>
+                    <input type="number" id="initUsia" placeholder="Contoh: 14" class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <button onclick="checkAutoMode()" id="btnStart" class="w-full mt-4 bg-blue-600 text-white font-bold py-3.5 md:py-4 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg flex justify-center items-center gap-2 text-sm md:text-base">
+                    Mulai Skrining Sekarang
+                </button>
+                <button onclick="handleRekapanAccess()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
+                    🔒 Lihat Rekapan Firebase Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div id="main-form" class="hidden animate-fade">
+            <div class="mb-6 no-print">
+                <div class="flex justify-between text-xs font-bold text-blue-600 mb-2 uppercase tracking-widest">
+                    <span id="progress-text">Progres: 0%</span>
+                    <span id="question-counter">Soal 0/6</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="questions-container" class="space-y-4 md:space-y-6"></div>
+
+            <div class="mt-8 md:mt-10 flex gap-4 no-print">
+                <button onclick="prosesSkoring()" id="btnSubmit" class="w-full bg-slate-800 dark:bg-blue-600 text-white font-bold py-3.5 md:py-4 rounded-2xl hover:opacity-90 transition active:scale-95 shadow-xl">
+                    Kirim & Lihat Analisis
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-section" class="hidden animate-fade pt-2">
+            <div class="flex justify-between items-center no-print mb-6">
+                <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600">← Kembali</button>
+                <div class="flex gap-2">
+                    <span id="sync-status" class="text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter">Menyimpan...</span>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-3 md:px-4 py-2 rounded-xl text-xs font-bold">📊 Excel</button>
+                </div>
+            </div>
+            
+            <div id="print-area" class="text-center">
+                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.2 PRO</span></h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8 text-sm p-4 md:p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
+                    <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
+                    <p><span class="opacity-60">Asal Sekolah:</span> <b id="resSekolah"></b></p>
+                    <p><span class="opacity-60">Usia:</span> <b id="resUsia"></b> th</p>
+                    <p><span class="opacity-60">Tanggal:</span> <b id="resTgl"></b></p>
+                    <p class="md:col-span-2"><span class="opacity-60">ID Transaksi:</span> <b id="resID" class="text-[10px] font-mono"></b></p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 md:gap-6 text-left">
+                    <div id="boxAnxietas" class="p-5 md:p-6 rounded-2xl border-2 transition-all">
+                        <h4 class="text-xs font-bold uppercase opacity-60 mb-2">Skala Ansietas</h4>
+                        <p id="resAnx" class="text-base md:text-lg font-bold mb-1"></p>
+                        <span id="scoreAnx" class="text-xs font-medium px-2 py-1 rounded bg-black/5"></span>
+                    </div>
+                    <div id="boxDepresi" class="p-5 md:p-6 rounded-2xl border-2 transition-all">
+                        <h4 class="text-xs font-bold uppercase opacity-60 mb-2">Skala Depresi</h4>
+                        <p id="resDep" class="text-base md:text-lg font-bold mb-1"></p>
+                        <span id="scoreDep" class="text-xs font-medium px-2 py-1 rounded bg-black/5"></span>
+                    </div>
+                </div>
+
+                <div class="mt-6 md:mt-8 py-6 border-t border-dashed border-slate-300">
+                    <div id="qrcode" class="flex justify-center mb-2"></div>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.2 PRO</span></p>
+                </div>
+            </div>
+
+            <button onclick="window.print()" class="no-print w-full mt-6 bg-white border-2 border-slate-800 text-slate-800 font-bold py-3 rounded-xl">🖨️ Cetak Hasil</button>
+        </div>
+    </div>
+
+    <script>
+        // ================= KONFIGURASI DATABASE =================
+        const FIREBASE_REST_URL = "https://mmys-50bf7-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const DB_COLLECTION = "skrining_mmys";
+        
+        let APP_VERSION = "V.1.2.2 PRO";
+        const REKAPAN_PIN = "1234"; 
+
+        let currentMode = '', lastResult = null;
+        let isRekapanUnlocked = false; 
+        let cachedRekapanData = null;  
+        let activeFilteredData = [];
+        let chartAnxInstance = null;
+        let chartDepInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateVersionDisplay();
+            try { localStorage.clear(); } catch(e) {}
+        });
+
+        function updateVersionDisplay() {
+            document.querySelectorAll('.app-version-tag').forEach(el => el.innerText = APP_VERSION);
+            document.querySelectorAll('.app-version-title').forEach(el => el.innerText = APP_VERSION);
+        }
+
+        document.getElementById('initNama').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+        });
+
+        // Helper Normalisasi Nama Sekolah (Menyatukan variasi ejaan lama)
+        function normalizeSchoolName(name) {
+            if (!name) return '';
+            let s = String(name).trim();
+            let upper = s.toUpperCase();
+            
+            if (upper.includes('RAUDHATUL AMININ') || upper.includes('RAUDATUL AMININ') || upper.includes('RAUDHATTUL AMININ')) {
+                if (upper.includes('MIS') || upper.includes('MI')) return 'MIS Raudhatul Aminin';
+                if (upper.includes('SMP')) return 'SMP IT Raudhatul Aminin';
+            }
+            if (upper.includes('SMAN 1 SAMPANAHAN')) return 'SMAN 1 Sampanahan';
+            if (upper.includes('SMAN 2 SAMPANAHAN')) return 'SMAN 2 Sampanahan';
+            if (upper.includes('SMP NEGERI 1 SAMPANAHAN') || upper.includes('SMPN 1 SAMPANAHAN')) return 'SMP Negeri 1 Sampanahan';
+            if (upper.includes('SMP NEGERI 2 SAMPANAHAN') || upper.includes('SMPN 2 SAMPANAHAN')) return 'SMP Negeri 2 Sampanahan';
+            if (upper.includes('MTSS DARUL ULUM')) return 'MTsS Darul Ulum Sukamaju';
+            if (upper.includes('MTSS SA MIFTAHUL')) return 'MTsS SA Miftahul Khair';
+            if (upper.includes('GUNUNG BATU BESAR')) return 'SDN 1 Gunung Batu Besar';
+            if (upper.includes('SUNGAI NYAMUK')) return 'SDN 2 Sungai Nyamuk';
+            if (upper === 'SDN SAMPANAHAN') return 'SDN Sampanahan';
+            if (upper.includes('SUNGAI BETUNG')) return 'SDN Sungai Betung';
+            if (upper.includes('SAFIR')) return 'SD Swasta Safir';
+
+            return s; // Jika sudah sesuai standar
+        }
+
+        const questions = {
+            anak: {
+                A: ["Sering merasa khawatir/tidak tenang, tegang, deg-degan terhadap hal negatif.", "Berpikir berlebihan & sulit mengendalikan diri terhadap hal negatif.", "Sulit tidur/konsentrasi saat memikirkan hal negatif."],
+                B: ["Sering sedih/tertekan tanpa sebab jelas.", "Kehilangan minat pada kegiatan yang biasanya disukai.", "Sering capek, sulit tidur, dan sulit fokus belajar."]
+            },
+            remaja: {
+                A: ["Saya sering merasa khawatir, tegang, atau gelisah terhadap masa depan/hal negatif.", "Saya merasa sulit mengontrol pikiran berlebihan saya.", "Saya sering sulit tidur karena pikiran yang mengganggu."],
+                B: ["Saya merasa sedih, hampa, atau putus asa hampir setiap hari.", "Saya kehilangan minat pada hobi atau teman-teman saya.", "Saya merasa sangat lelah atau tidak berenergi untuk beraktivitas."]
+            }
+        };
+
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+
+        function checkAutoMode() {
+            const nama = document.getElementById('initNama').value.trim();
+            const rawSekolah = document.getElementById('initSekolah').value.trim();
+            const sekolah = normalizeSchoolName(rawSekolah);
+            const usia = parseInt(document.getElementById('initUsia').value);
+            
+            if(!nama || !rawSekolah || isNaN(usia)) return Swal.fire('Error', 'Harap lengkapi Nama, Asal Sekolah, dan Usia terlebih dahulu', 'error');
+            if(usia < 7 || usia > 18) return Swal.fire('Error', 'Usia harus 7-18 tahun', 'warning');
+            
+            currentMode = (usia <= 9) ? 'anak' : 'remaja';
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            document.getElementById('step-landing').classList.add('hidden');
+            document.getElementById('main-form').classList.remove('hidden');
+            const container = document.getElementById('questions-container');
+            
+            let html = '<div class="space-y-4 md:space-y-6">';
+            ['A', 'B'].forEach(type => {
+                const label = type === 'A' ? 'ANXIETAS' : 'DEPRESI';
+                html += `<h3 class="font-bold text-blue-600 dark:text-blue-400 text-xs md:text-sm tracking-widest underline underline-offset-8">SKALA ${label}</h3>`;
+                questions[currentMode][type].forEach((q, i) => {
+                    html += `
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-4 md:p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 border border-white/20 hover:border-blue-300 transition-all">
+                            <p class="text-xs md:text-sm flex-1"><span class="font-bold text-blue-500 mr-2">${i+1}.</span> ${q}</p>
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <label class="flex-1 md:w-20 cursor-pointer">
+                                    <input type="radio" name="${type}${i}" value="1" onchange="updateProgress()" class="hidden radio-custom">
+                                    <div class="radio-label text-center py-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 text-xs font-bold transition-all">Ya</div>
+                                </label>
+                                <label class="flex-1 md:w-20 cursor-pointer">
+                                    <input type="radio" name="${type}${i}" value="0" onchange="updateProgress()" class="hidden radio-custom">
+                                    <div class="radio-label text-center py-2 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 text-xs font-bold transition-all">Tidak</div>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+            container.innerHTML = html + '</div>';
+            window.scrollTo(0,0);
+        }
+
+        function updateProgress() {
+            let answered = 0;
+            ['A', 'B'].forEach(type => {
+                for(let i=0; i<3; i++) {
+                    if(document.querySelector(`input[name="${type}${i}"]:checked`)) answered++;
+                }
+            });
+            const pct = Math.round((answered/6)*100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('progress-text').innerText = `Progres: ${pct}%`;
+            document.getElementById('question-counter').innerText = `Soal ${answered}/6`;
+        }
+
+        async function prosesSkoring() {
+            let belumDiisi = [];
+            ['A', 'B'].forEach(type => {
+                const namaSkala = type === 'A' ? 'Ansietas' : 'Depresi';
+                for(let i=0; i<3; i++) {
+                    if(!document.querySelector(`input[name="${type}${i}"]:checked`)) {
+                        belumDiisi.push(`Skala ${namaSkala} No. ${i+1}`);
+                    }
+                }
+            });
+
+            if(belumDiisi.length > 0) {
+                return Swal.fire({
+                    title: 'Belum Lengkap!',
+                    html: `<div class="text-left text-sm p-2 text-rose-600 font-semibold">Silakan isi soal berikut:<br>• ${belumDiisi.join('<br>• ')}</div>`,
+                    icon: 'warning'
+                });
+            }
+
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin mr-2">🌀</span> Memproses Skor...`;
+
+            const getScore = (p) => {
+                let total = 0;
+                for(let i=0; i<3; i++) {
+                    const el = document.querySelector(`input[name="${p}${i}"]:checked`);
+                    if(el) total += parseInt(el.value);
+                }
+                return total;
+            };
+
+            try {
+                const scoreA = getScore('A');
+                const scoreB = getScore('B');
+
+                const data = {
+                    id: `MMYS-${Date.now()}-${document.getElementById('initNama').value.substring(0,3).toUpperCase()}`,
+                    nama: document.getElementById('initNama').value.trim(),
+                    sekolah: normalizeSchoolName(document.getElementById('initSekolah').value),
+                    usia: parseInt(document.getElementById('initUsia').value),
+                    tanggal: new Date().toLocaleDateString('id-ID'),
+                    timestamp: Date.now(),
+                    scoreA, scoreB,
+                    interA: interpret(scoreA),
+                    interB: interpret(scoreB),
+                    rekomendasi: getRekomendasiKlinis(scoreA, scoreB)
+                };
+
+                displayResult(data);
+                syncToFirebase(data);
+
+            } catch (error) {
+                console.error("Internal Crash Log: ", error);
+                Swal.fire({
+                    title: 'Error Pemrosesan',
+                    text: `Detail Masalah: ${error.message}`,
+                    icon: 'error'
+                });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `Kirim & Lihat Analisis`;
+            }
+        }
+
+        function interpret(s) {
+            if(s >= 2) return { text: "Gejala Berat", color: "border-rose-500 bg-rose-50 text-rose-700" };
+            if(s === 1) return { text: "Gejala Ringan", color: "border-amber-500 bg-amber-50 text-amber-700" };
+            return { text: "Normal / Stabil", color: "border-emerald-500 bg-emerald-50 text-emerald-700" };
+        }
+
+        function getRekomendasiKlinis(sA, sB) {
+            if (sA >= 2 || sB >= 2) return "Rujukan Poli PKPR Puskesmas";
+            if (sA === 1 || sB === 1) return "Konseling Sebaya / Guru BK";
+            return "Edukasi Pola Hidup Sehat";
+        }
+
+        function displayResult(d) {
+            lastResult = d;
+            document.getElementById('resNama').innerText = d.nama;
+            document.getElementById('resSekolah').innerText = d.sekolah;
+            document.getElementById('resUsia').innerText = d.usia;
+            document.getElementById('resTgl').innerText = d.tanggal;
+            document.getElementById('resID').innerText = d.id;
+
+            document.getElementById('resAnx').innerText = d.interA.text;
+            document.getElementById('scoreAnx').innerText = `Skor: ${d.scoreA}/3`;
+            document.getElementById('boxAnxietas').className = `p-5 md:p-6 rounded-2xl border-2 transition-all ${d.interA.color}`;
+
+            document.getElementById('resDep').innerText = d.interB.text;
+            document.getElementById('scoreDep').innerText = `Skor: ${d.scoreB}/3`;
+            document.getElementById('boxDepresi').className = `p-5 md:p-6 rounded-2xl border-2 transition-all ${d.interB.color}`;
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            
+            if (typeof QRCode !== "undefined") {
+                new QRCode(qrContainer, { text: d.id, width: 80, height: 80 });
+            }
+
+            document.getElementById('main-form').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+        }
+
+        // ================= SIMPAN KE FIREBASE (REST API) =================
+        async function syncToFirebase(data) {
+            const status = document.getElementById('sync-status');
+            if (status) {
+                status.innerText = "Menyimpan...";
+                status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter";
+            }
+
+            try {
+                const res = await fetch(`${FIREBASE_REST_URL}/${DB_COLLECTION}/${encodeURIComponent(data.id)}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                cachedRekapanData = null;
+
+                if (status) {
+                    status.innerText = "Synced to Firebase";
+                    status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold uppercase";
+                }
+            } catch (e) { 
+                console.error("Gagal simpan ke Firebase:", e);
+                if (status) {
+                    status.innerText = "Gagal Sync";
+                    status.className = "text-[10px] self-center px-2 py-1 rounded-lg bg-rose-100 text-rose-700 font-bold uppercase";
+                }
+                Swal.fire('Gagal Menyimpan', `Koneksi database bermasalah: ${e.message}`, 'error');
+            }
+        }
+
+        function handleRekapanAccess() {
+            if (isRekapanUnlocked) {
+                showRekapanModal();
+            } else {
+                promptPinLock();
+            }
+        }
+
+        function promptPinLock() {
+            Swal.fire({
+                title: '🔒 Masukkan Kata Sandi',
+                text: 'Akses Rekapan Data Terproteksi',
+                html: `
+                    <div class="relative w-full max-w-xs mx-auto mt-3">
+                        <input type="password" id="pinInput" placeholder="Masukkan PIN..." class="w-full p-3 pr-10 text-center text-lg font-bold border-2 border-slate-300 rounded-xl focus:border-blue-500 outline-none">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 focus:outline-none text-lg">
+                            👁️
+                        </button>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Buka Rekapan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#2563eb',
+                preConfirm: () => {
+                    const pin = document.getElementById('pinInput').value;
+                    if (pin !== REKAPAN_PIN) {
+                        Swal.showValidationMessage('Kata Sandi / PIN Salah!');
+                    }
+                    return pin === REKAPAN_PIN;
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    isRekapanUnlocked = true; 
+                    showRekapanModal();
+                }
+            });
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('pinInput');
+            if (input) {
+                input.type = (input.type === 'password') ? 'text' : 'password';
+            }
+        }
+
+        function lockRekapanSession() {
+            isRekapanUnlocked = false;
+            Swal.fire('Terkunci', 'Sesi rekapan berhasil dikunci kembali.', 'info');
+        }
+
+        // ================= AMBIL DATA REKAPAN & DEDUPLIKASI SEKOLAH =================
+        async function showRekapanModal() {
+            if (cachedRekapanData && cachedRekapanData.length > 0) {
+                renderRekapanTableUI(cachedRekapanData);
+                return;
+            }
+
+            Swal.fire({
+                title: '<span class="text-lg md:text-xl font-bold text-slate-800">Menyingkronkan Data...</span>',
+                html: '<p class="text-xs text-slate-500 font-medium">Menghubungkan ke Database Puskesmas Sampanahan</p>',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const res = await fetch(`${FIREBASE_REST_URL}/${DB_COLLECTION}.json`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const rawData = await res.json();
+
+                if (!rawData) {
+                    return Swal.fire('Rekapan Kosong', 'Belum ada data skrining terdaftar di database.', 'info');
+                }
+
+                cachedRekapanData = Object.values(rawData).map(d => {
+                    const val = Object.values(d);
+                    const nama = d.nama || d['Nama Peserta'] || d.name || (typeof val[1] === 'string' ? val[1] : '-') || '-';
+                    const rawSekolah = d.sekolah || d['Asal Sekolah'] || d.school || '-';
+                    const sekolah = normalizeSchoolName(rawSekolah);
+                    const usia = d.usia || d['Usia'] || d.age || 0;
+                    const tanggal = d.tanggal || d['Tanggal'] || d['Tanggal Skrining'] || '-';
+                    const scoreA = parseInt(d.scoreA ?? d['Skor Ansietas'] ?? 0);
+                    const scoreB = parseInt(d.scoreB ?? d['Skor Depresi'] ?? 0);
+
+                    return {
+                        id: d.id || d['ID Transaksi'] || '-',
+                        nama: nama,
+                        sekolah: sekolah,
+                        usia: usia,
+                        tanggal: tanggal,
+                        timestamp: d.timestamp || Date.now(),
+                        scoreA: isNaN(scoreA) ? 0 : scoreA,
+                        scoreB: isNaN(scoreB) ? 0 : scoreB,
+                        interA: d.interA || interpret(isNaN(scoreA) ? 0 : scoreA),
+                        interB: d.interB || interpret(isNaN(scoreB) ? 0 : scoreB),
+                        rekomendasi: d.rekomendasi || getRekomendasiKlinis(scoreA, scoreB)
+                    };
+                }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                
+                renderRekapanTableUI(cachedRekapanData);
+
+            } catch (err) {
+                console.error("Gagal baca data:", err);
+                return Swal.fire('Error Koneksi', `Gagal memuat data dari database: ${err.message}`, 'error');
+            }
+        }
+
+        function renderRekapanTableUI(history) {
+            // Deduplikasi & Pembersihan Filter Dropdown Sekolah
+            const cleanSchools = [...new Set(
+                history
+                    .map(h => normalizeSchoolName(h.sekolah))
+                    .filter(s => s && s !== '-' && s !== 'ASAL SEKOLAH' && s !== 'SEKOLAH')
+            )].sort();
+
+            const schoolOptions = cleanSchools.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            const contentHtml = `
+                <div class="text-left space-y-3 md:space-y-4 text-slate-800 dark:text-slate-100">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <button onclick="forceRefreshData()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">🔄 Refresh Data</button>
+                        <button onclick="lockRekapanSession()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">🔒 Kunci</button>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 bg-slate-100 dark:bg-slate-800/80 p-2.5 md:p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Cari Nama / ID</label>
+                            <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="Ketik nama peserta..." class="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Filter Sekolah</label>
+                            <select id="filterSchool" onchange="applyFilters()" class="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                                <option value="">Semua Sekolah</option>
+                                ${schoolOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">Status Gejala</label>
+                            <select id="filterStatus" onchange="applyFilters()" class="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                                <option value="">Semua Status</option>
+                                <option value="berat">🚨 Prioritas Rujukan (Gejala Berat)</option>
+                                <option value="ringan">⚠️ Gejala Ringan (Konseling)</option>
+                                <option value="normal">✅ Normal / Edukasi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats Box -->
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="p-2.5 md:p-3 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-200">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Total Peserta</p>
+                            <p id="statTotal" class="text-lg md:text-xl font-black text-blue-600">0</p>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-amber-50 dark:bg-slate-800 rounded-xl border border-amber-200">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Ansietas Berat</p>
+                            <p id="statAnxBerat" class="text-lg md:text-xl font-black text-rose-600">0</p>
+                            <p id="statAnxDetail" class="text-[9px] text-slate-400">Ringan: 0 | Normal: 0</p>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-purple-50 dark:bg-slate-800 rounded-xl border border-purple-200">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Depresi Berat</p>
+                            <p id="statDepBerat" class="text-lg md:text-xl font-black text-rose-600">0</p>
+                            <p id="statDepDetail" class="text-[9px] text-slate-400">Ringan: 0 | Normal: 0</p>
+                        </div>
+                    </div>
+
+                    <!-- Visualisasi Grafik Interaktif -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <div class="flex flex-col items-center">
+                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Distribusi Ansietas</h5>
+                            <div class="w-36 h-36 md:w-40 md:h-40">
+                                <canvas id="chartAnsietas"></canvas>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Distribusi Depresi</h5>
+                            <div class="w-36 h-36 md:w-40 md:h-40">
+                                <canvas id="chartDepresi"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Rekapan In-App Responsif -->
+                    <div class="table-responsive-custom overflow-x-auto max-h-72 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-inner bg-white dark:bg-slate-900">
+                        <table class="min-w-[800px] w-full text-left border-collapse">
+                            <thead class="bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase sticky top-0 z-20 shadow-sm whitespace-nowrap">
+                                <tr>
+                                    <th class="p-3 text-center w-10">#</th>
+                                    <th class="p-3 w-24">Flag Status</th>
+                                    <th class="p-3 w-24">Tanggal</th>
+                                    <th class="p-3 min-w-[150px]">Nama Peserta</th>
+                                    <th class="p-3 min-w-[150px]">Asal Sekolah</th>
+                                    <th class="p-3 w-16 text-center">Usia</th>
+                                    <th class="p-3 min-w-[120px]">Skala Ansietas</th>
+                                    <th class="p-3 min-w-[120px]">Skala Depresi</th>
+                                    <th class="p-3 min-w-[180px]">Rekomendasi Tindak Lanjut</th>
+                                    <th class="p-3 text-center min-w-[90px]">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekapanTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <!-- Dinamis dirender oleh filter -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS <span class="app-version-tag">${APP_VERSION}</span> • Puskesmas Sampanahan Digital</p>
+                </div>
+            `;
+
+            Swal.fire({
+                title: '📊 Rekapan Data Skrining',
+                html: contentHtml,
+                width: '950px',
+                showCancelButton: true,
+                confirmButtonText: '📥 Export Excel (Standar Puskesmas)',
+                cancelButtonText: 'Tutup',
+                confirmButtonColor: '#059669',
+                didOpen: () => {
+                    initCharts();
+                    applyFilters();
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    exportAllToExcel(activeFilteredData);
+                }
+            });
+        }
+
+        function initCharts() {
+            const ctxA = document.getElementById('chartAnsietas');
+            const ctxB = document.getElementById('chartDepresi');
+            if (!ctxA || !ctxB) return;
+
+            if (chartAnxInstance) chartAnxInstance.destroy();
+            if (chartDepInstance) chartDepInstance.destroy();
+
+            const chartConfig = () => ({
+                type: 'doughnut',
+                data: {
+                    labels: ['Normal', 'Ringan', 'Berat'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } }
+                    }
+                }
+            });
+
+            chartAnxInstance = new Chart(ctxA, chartConfig());
+            chartDepInstance = new Chart(ctxB, chartConfig());
+        }
+
+        function applyFilters() {
+            if (!cachedRekapanData) return;
+
+            const searchVal = (document.getElementById('filterSearch')?.value || '').toLowerCase().trim();
+            const schoolVal = document.getElementById('filterSchool')?.value || '';
+            const statusVal = document.getElementById('filterStatus')?.value || '';
+
+            activeFilteredData = cachedRekapanData.filter(d => {
+                const namaStr = (d.nama || '').toLowerCase();
+                const idStr = (d.id || '').toLowerCase();
+                const matchSearch = searchVal === '' || namaStr.includes(searchVal) || idStr.includes(searchVal);
+                const matchSchool = schoolVal === '' || d.sekolah === schoolVal;
+                
+                let matchStatus = true;
+                const isBerat = (d.scoreA >= 2 || d.scoreB >= 2);
+                const isRingan = (d.scoreA === 1 || d.scoreB === 1) && !isBerat;
+                const isNormal = (d.scoreA === 0 && d.scoreB === 0);
+
+                if (statusVal === 'berat') matchStatus = isBerat;
+                else if (statusVal === 'ringan') matchStatus = isRingan;
+                else if (statusVal === 'normal') matchStatus = isNormal;
+
+                return matchSearch && matchSchool && matchStatus;
+            });
+
+            updateRekapanStatsAndTable(activeFilteredData);
+        }
+
+        function updateRekapanStatsAndTable(dataList) {
+            const tbody = document.getElementById('rekapanTableBody');
+            if (!tbody) return;
+
+            let anxNormal = 0, anxRingan = 0, anxBerat = 0;
+            let depNormal = 0, depRingan = 0, depBerat = 0;
+
+            dataList.forEach(h => {
+                if (h.scoreA >= 2) anxBerat++; else if (h.scoreA === 1) anxRingan++; else anxNormal++;
+                if (h.scoreB >= 2) depBerat++; else if (h.scoreB === 1) depRingan++; else depNormal++;
+            });
+
+            document.getElementById('statTotal').innerText = dataList.length;
+            document.getElementById('statAnxBerat').innerText = anxBerat;
+            document.getElementById('statAnxDetail').innerText = `Ringan: ${anxRingan} | Normal: ${anxNormal}`;
+            document.getElementById('statDepBerat').innerText = depBerat;
+            document.getElementById('statDepDetail').innerText = `Ringan: ${depRingan} | Normal: ${depNormal}`;
+
+            if (chartAnxInstance && chartDepInstance) {
+                chartAnxInstance.data.datasets[0].data = [anxNormal, anxRingan, anxBerat];
+                chartAnxInstance.update();
+
+                chartDepInstance.data.datasets[0].data = [depNormal, depRingan, depBerat];
+                chartDepInstance.update();
+            }
+
+            if (dataList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-xs text-slate-400 font-medium">Tidak ada data skrining yang cocok</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = dataList.map((h, i) => {
+                const isSevere = (h.scoreA >= 2 || h.scoreB >= 2);
+                const flagBadge = isSevere 
+                    ? `<span class="badge-alert bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap">🚨 RUJUKAN</span>` 
+                    : (h.scoreA === 1 || h.scoreB === 1)
+                    ? `<span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">⚠️ KONSELING</span>`
+                    : `<span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">✅ STABIL</span>`;
+
+                const rowBg = isSevere 
+                    ? 'bg-rose-50/60 dark:bg-rose-950/20 font-medium' 
+                    : (i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50');
+
+                const safeItem = encodeURIComponent(JSON.stringify(h));
+
+                return `
+                    <tr class="text-left text-xs hover:bg-blue-50/60 dark:hover:bg-slate-700 transition ${rowBg}">
+                        <td class="p-3 font-bold text-center text-slate-400">${i+1}</td>
+                        <td class="p-3 whitespace-nowrap">${flagBadge}</td>
+                        <td class="p-3 text-[10px] whitespace-nowrap text-slate-500 dark:text-slate-400">${h.tanggal}</td>
+                        <td class="p-3 font-bold text-slate-800 dark:text-white whitespace-nowrap">${h.nama}</td>
+                        <td class="p-3 text-blue-600 dark:text-blue-400 font-semibold whitespace-nowrap">${h.sekolah}</td>
+                        <td class="p-3 text-center whitespace-nowrap">${h.usia} th</td>
+                        <td class="p-3 font-semibold whitespace-nowrap ${h.scoreA >= 2 ? 'text-rose-600 font-bold' : h.scoreA === 1 ? 'text-amber-600' : 'text-emerald-600'}">${h.scoreA}/3 (${h.interA ? h.interA.text : '-'})</td>
+                        <td class="p-3 font-semibold whitespace-nowrap ${h.scoreB >= 2 ? 'text-rose-600 font-bold' : h.scoreB === 1 ? 'text-amber-600' : 'text-emerald-600'}">${h.scoreB}/3 (${h.interB ? h.interB.text : '-'})</td>
+                        <td class="p-3 text-[11px] font-semibold whitespace-nowrap ${isSevere ? 'text-rose-600' : 'text-slate-600 dark:text-slate-300'}">${h.rekomendasi}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <div class="flex gap-1.5 justify-center">
+                                <button onclick="kirimWhatsAppHasil('${safeItem}')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow" title="Kirim WA">💬 WA</button>
+                                <button onclick="lihatDetailPesertaModal('${safeItem}')" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[10px] font-bold shadow" title="Lihat Detail">🔍</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Fitur Kirim WhatsApp Otomatis
+        function kirimWhatsAppHasil(safeItemEncoded) {
+            const item = JSON.parse(decodeURIComponent(safeItemEncoded));
+            const pesan = `*HASIL SKRINING KESEHATAN MENTAL MMYS*\n*UPTD PUSKESMAS SAMPANAHAN*\n-----------------------------------\n` +
+                          `• *Nama Peserta:* ${item.nama}\n` +
+                          `• *Asal Sekolah:* ${item.sekolah}\n` +
+                          `• *Usia:* ${item.usia} Tahun\n` +
+                          `• *Tanggal Skrining:* ${item.tanggal}\n` +
+                          `• *Skala Ansietas:* ${item.scoreA}/3 (${item.interA ? item.interA.text : '-'})\n` +
+                          `• *Skala Depresi:* ${item.scoreB}/3 (${item.interB ? item.interB.text : '-'})\n` +
+                          `• *Rekomendasi:* ${item.rekomendasi}\n` +
+                          `-----------------------------------\n` +
+                          `_Pesan otomatis dari Sistem Digital MMYS Puskesmas Sampanahan_`;
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(pesan)}`;
+            window.open(url, '_blank');
+        }
+
+        // Fitur Modal Kartu Detail Peserta
+        function lihatDetailPesertaModal(safeItemEncoded) {
+            const item = JSON.parse(decodeURIComponent(safeItemEncoded));
+            Swal.fire({
+                title: '📋 Detail Skrining Peserta',
+                html: `
+                    <div class="text-left text-xs space-y-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <p><b>ID Transaksi:</b> <span class="font-mono text-[11px]">${item.id}</span></p>
+                        <p><b>Nama Peserta:</b> <span class="font-bold text-slate-800 dark:text-white">${item.nama}</span></p>
+                        <p><b>Asal Sekolah:</b> ${item.sekolah}</p>
+                        <p><b>Usia:</b> ${item.usia} Tahun</p>
+                        <p><b>Tanggal Skrining:</b> ${item.tanggal}</p>
+                        <hr class="border-slate-200 dark:border-slate-700">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="p-2.5 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">Ansietas</p>
+                                <p class="font-bold text-xs text-blue-600">${item.scoreA}/3 - ${item.interA ? item.interA.text : '-'}</p>
+                            </div>
+                            <div class="p-2.5 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">Depresi</p>
+                                <p class="font-bold text-xs text-purple-600">${item.scoreB}/3 - ${item.interB ? item.interB.text : '-'}</p>
+                            </div>
+                        </div>
+                        <p class="pt-1"><b>Tindak Lanjut Klinis:</b> <span class="text-rose-600 font-bold">${item.rekomendasi}</span></p>
+                    </div>
+                `,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#2563eb'
+            });
+        }
+
+        function forceRefreshData() {
+            cachedRekapanData = null;
+            showRekapanModal();
+        }
+
+        // ================= MULTI-SHEET EXPORT FORMAT STANDAR PUSKESMAS =================
+        function exportAllToExcel(dataList) {
+            if(!dataList || !dataList.length) {
+                return Swal.fire('Data Kosong', 'Tidak ada data untuk diexport.', 'warning');
+            }
+
+            const exportRows = dataList.map((d, i) => ({
+                "No": i + 1,
+                "ID Transaksi": d.id,
+                "Tanggal": d.tanggal,
+                "Nama Peserta": d.nama,
+                "Asal Sekolah": d.sekolah,
+                "Usia": d.usia,
+                "Ansietas (Skor)": `${d.scoreA}/3`,
+                "Kesimpulan Ansietas": d.interA ? d.interA.text : '',
+                "Depresi (Skor)": `${d.scoreB}/3`,
+                "Kesimpulan Depresi": d.interB ? d.interB.text : '',
+                "Rekomendasi Tindak Lanjut": d.rekomendasi || getRekomendasiKlinis(d.scoreA, d.scoreB)
+            }));
+
+            const wsMain = XLSX.utils.json_to_sheet(exportRows);
+
+            wsMain['!cols'] = [
+                { wch: 5 },   // No
+                { wch: 24 },  // ID Transaksi
+                { wch: 14 },  // Tanggal
+                { wch: 28 },  // Nama Peserta
+                { wch: 25 },  // Asal Sekolah
+                { wch: 8 },   // Usia
+                { wch: 16 },  // Ansietas (Skor)
+                { wch: 22 },  // Kesimpulan Ansietas
+                { wch: 16 },  // Depresi (Skor)
+                { wch: 22 },  // Kesimpulan Depresi
+                { wch: 30 }   // Rekomendasi Tindak Lanjut
+            ];
+
+            let total = dataList.length;
+            let anxBerat = 0, anxRingan = 0, anxNormal = 0;
+            let depBerat = 0, depRingan = 0, depNormal = 0;
+
+            dataList.forEach(h => {
+                if (h.scoreA >= 2) anxBerat++; else if (h.scoreA === 1) anxRingan++; else anxNormal++;
+                if (h.scoreB >= 2) depBerat++; else if (h.scoreB === 1) depRingan++; else depNormal++;
+            });
+
+            const summaryRows = [
+                { "Indikator Rekapitulasi": "Unit Kerja", "Jumlah": "UPTD Puskesmas Sampanahan" },
+                { "Indikator Rekapitulasi": "Tanggal Tarik Data", "Jumlah": new Date().toLocaleDateString('id-ID') },
+                { "Indikator Rekapitulasi": "Total Peserta Diskrinning", "Jumlah": total },
+                { "Indikator Rekapitulasi": "---------------------------", "Jumlah": "---------------------------" },
+                { "Indikator Rekapitulasi": "Ansietas: Normal / Stabil", "Jumlah": anxNormal },
+                { "Indikator Rekapitulasi": "Ansietas: Gejala Ringan", "Jumlah": anxRingan },
+                { "Indikator Rekapitulasi": "Ansietas: Gejala Berat (Prioritas)", "Jumlah": anxBerat },
+                { "Indikator Rekapitulasi": "---------------------------", "Jumlah": "---------------------------" },
+                { "Indikator Rekapitulasi": "Depresi: Normal / Stabil", "Jumlah": depNormal },
+                { "Indikator Rekapitulasi": "Depresi: Gejala Ringan", "Jumlah": depRingan },
+                { "Indikator Rekapitulasi": "Depresi: Gejala Berat (Prioritas)", "Jumlah": depBerat }
+            ];
+
+            const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+            wsSummary['!cols'] = [{ wch: 35 }, { wch: 30 }];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, wsMain, "Data_Skrining_Puskesmas");
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan_Statistik");
+
+            XLSX.writeFile(wb, `Laporan_Skrining_MMYS_Puskesmas_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        function exportToExcel() {
+            if(!lastResult) return;
+            const exportData = {
+                "ID Transaksi": lastResult.id,
+                "Tanggal Skrining": lastResult.tanggal,
+                "Nama Peserta": lastResult.nama,
+                "Asal Sekolah": lastResult.sekolah,
+                "Usia": lastResult.usia,
+                "Skor Ansietas": `${lastResult.scoreA}/3`,
+                "Kesimpulan Ansietas": lastResult.interA.text,
+                "Skor Depresi": `${lastResult.scoreB}/3`,
+                "Kesimpulan Depresi": lastResult.interB.text,
+                "Rekomendasi Tindak Lanjut": lastResult.rekomendasi || getRekomendasiKlinis(lastResult.scoreA, lastResult.scoreB)
+            };
+            const ws = XLSX.utils.json_to_sheet([exportData]);
+            ws['!cols'] = [{ wch: 22 }, { wch: 15 }, { wch: 25 }, { wch: 25 }, { wch: 8 }, { wch: 14 }, { wch: 20 }, { wch: 14 }, { wch: 20 }, { wch: 30 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "MMYS_Hasil");
+            XLSX.writeFile(wb, `MMYS_${lastResult.nama}.xlsx`);
+        }
+    </script>
+</body>
+</html>
