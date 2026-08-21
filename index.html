@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MMYS PRO - Sistem Skrining Puskesmas</title>
     
+    <!-- PWA Primary Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MMYS PRO">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -32,7 +40,24 @@
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
-<body class="p-3 md:p-8 flex justify-center items-start">
+<body class="p-3 md:p-8 flex flex-col justify-start items-center">
+
+    <!-- Banner Prompt Install PWA (Otomatis Muncul jika belum terinstall) -->
+    <div id="pwa-install-banner" class="hidden w-full max-w-4xl bg-blue-600 text-white p-3.5 rounded-2xl mb-4 shadow-xl flex justify-between items-center no-print z-50">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-xl">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold leading-tight">Pasang Aplikasi MMYS PRO</p>
+                <p class="text-[10px] opacity-80">Akses lebih cepat & ringan langsung dari layar utama</p>
+            </div>
+        </div>
+        <div class="flex gap-2 items-center">
+            <button onclick="dismissInstallPrompt()" class="text-xs px-3 py-1.5 rounded-xl hover:bg-white/10 font-semibold">Nanti</button>
+            <button onclick="triggerPwaInstall()" class="text-xs px-4 py-1.5 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 shadow-md">Install</button>
+        </div>
+    </div>
 
     <!-- Navigasi Atas -->
     <div class="fixed top-3 right-3 flex gap-2 no-print z-50">
@@ -51,9 +76,9 @@
         <div id="step-landing" class="text-center py-6 md:py-10 animate-fade">
             <div class="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                Versi <span class="app-version-tag">V.1.2.3 PRO</span> • Cloud Auto-Sync
+                Versi <span class="app-version-tag">V.1.2.4 PRO</span> • PWA Auto-Sync
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.3 PRO</span></h1>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.4 PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-6 md:mb-8 italic text-xs md:text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
             
             <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-5 md:p-6 rounded-3xl border border-white">
@@ -139,7 +164,7 @@
             </div>
             
             <div id="print-area" class="text-center">
-                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.3 PRO</span></h2>
+                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.4 PRO</span></h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8 text-sm p-4 md:p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
                     <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
@@ -164,7 +189,7 @@
 
                 <div class="mt-6 md:mt-8 py-6 border-t border-dashed border-slate-300">
                     <div id="qrcode" class="flex justify-center mb-2"></div>
-                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.3 PRO</span></p>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.4 PRO</span></p>
                 </div>
             </div>
 
@@ -199,7 +224,7 @@
         const DB_COLLECTION = "skrining_mmys";
         const CONFIG_COLLECTION = "app_config";
         
-        let APP_VERSION = "V.1.2.3 PRO";
+        let APP_VERSION = "V.1.2.4 PRO";
         const DEFAULT_PIN = "1234";
 
         function getMasterPin() {
@@ -217,6 +242,63 @@
         let chartAnxInstance = null;
         let chartDepInstance = null;
         let chartSchoolInstance = null;
+
+        // ================= PWA REGISTRATION & INSTALL LOGIC =================
+        let deferredPrompt = null;
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((reg) => {
+                    console.log('[PWA] ServiceWorker aktif:', reg.scope);
+                    
+                    // Cek pembaruan berkala setiap service worker berganti
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('[PWA] Versi baru terdeteksi, membersihkan cache...');
+                            }
+                        });
+                    });
+                }).catch(err => console.log('[PWA] Gagal register:', err));
+            });
+
+            // Reload halus otomatis saat service worker baru mengambil alih
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner && !localStorage.getItem('PWA_PROMPT_DISMISSED')) {
+                banner.classList.remove('hidden');
+            }
+        });
+
+        function triggerPwaInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('[PWA] Pengguna menyetujui instalasi');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('pwa-install-banner')?.classList.add('hidden');
+                });
+            }
+        }
+
+        function dismissInstallPrompt() {
+            document.getElementById('pwa-install-banner')?.classList.add('hidden');
+            localStorage.setItem('PWA_PROMPT_DISMISSED', 'true');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             updateVersionDisplay();
@@ -250,7 +332,7 @@
                                     <div class="bg-slate-100 dark:bg-slate-800 p-2.5 rounded-xl text-slate-600 dark:text-slate-300">
                                         <b>Catatan Pembaruan:</b><br>${changeLog}
                                     </div>
-                                    <p class="text-[10px] text-slate-400">Petugas Puskesmas siap menggunakan fitur termutakhir.</p>
+                                    <p class="text-[10px] text-slate-400">Cache otomatis dibersihkan untuk kinerja optimal.</p>
                                 </div>
                             `,
                             icon: 'info',

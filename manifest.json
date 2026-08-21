@@ -1,0 +1,24 @@
+{
+  "name": "MMYS PRO - Sistem Skrining Puskesmas",
+  "short_name": "MMYS PRO",
+  "description": "Sistem Skrining Kesehatan Mental Puskesmas Sampanahan",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f9ff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
