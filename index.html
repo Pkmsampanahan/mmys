@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MMYS PRO - Sistem Skrining Puskesmas</title>
     
@@ -35,8 +36,13 @@
 
     <!-- Navigasi Atas -->
     <div class="fixed top-3 right-3 flex gap-2 no-print z-50">
-        <button onclick="handleRekapanAccess()" class="p-2.5 md:p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700"> Rekapan</button>
-        <button onclick="toggleDarkMode()" class="p-2.5 md:p-3 rounded-full glass hover:scale-110 transition shadow-lg"></button>
+        <button onclick="handleRekapanAccess()" class="p-2.5 md:p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/><path fill="none" d="M0 0h24v24H0z"/></svg>
+            <span>Rekapan</span>
+        </button>
+        <button onclick="toggleDarkMode()" class="p-2.5 md:p-3 rounded-full glass hover:scale-110 transition shadow-lg flex items-center justify-center">
+            <svg class="w-4 h-4 fill-current text-slate-700 dark:text-amber-300" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+        </button>
     </div>
 
     <div id="app" class="w-full max-w-4xl glass rounded-[28px] md:rounded-[32px] p-4 md:p-10 relative overflow-hidden shadow-2xl mt-10 md:mt-0">
@@ -45,7 +51,7 @@
         <div id="step-landing" class="text-center py-6 md:py-10 animate-fade">
             <div class="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                Versi <span class="app-version-tag">V.1.2.3 PRO</span> • Cloud Auto-Sync
+                Versi <span class="app-version-tag">V.1.2.3 PRO</span> â€¢ Cloud Auto-Sync
             </div>
             <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.3 PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-6 md:mb-8 italic text-xs md:text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
@@ -89,7 +95,8 @@
                     Mulai Skrining Sekarang
                 </button>
                 <button onclick="handleRekapanAccess()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
-                     Lihat Rekapan Firebase Data
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    Lihat Rekapan Firebase Data
                 </button>
             </div>
         </div>
@@ -118,10 +125,16 @@
         <!-- Result Section -->
         <div id="result-section" class="hidden animate-fade pt-2">
             <div class="flex justify-between items-center no-print mb-6">
-                <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600"> Kembali</button>
+                <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600 font-bold">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                    Kembali
+                </button>
                 <div class="flex gap-2">
                     <span id="sync-status" class="text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter">Menyimpan...</span>
-                    <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-3 md:px-4 py-2 rounded-xl text-xs font-bold"> Excel</button>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-3 md:px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.5 14L12 13.5 8.5 17H6l4.5-5.5L6 6h2.5L12 9.5 15.5 6H18l-4.5 5.5L18 17h-2.5z"/></svg>
+                        Excel
+                    </button>
                 </div>
             </div>
             
@@ -155,7 +168,10 @@
                 </div>
             </div>
 
-            <button onclick="window.print()" class="no-print w-full mt-6 bg-white border-2 border-slate-800 text-slate-800 font-bold py-3 rounded-xl"> Cetak Hasil</button>
+            <button onclick="window.print()" class="no-print w-full mt-6 bg-white border-2 border-slate-800 text-slate-800 font-bold py-3 rounded-xl flex justify-center items-center gap-2">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                Cetak Hasil
+            </button>
         </div>
     </div>
 
@@ -227,7 +243,7 @@
                         updateVersionDisplay();
 
                         Swal.fire({
-                            title: ' Sistem Diperbarui!',
+                            title: 'Sistem Diperbarui!',
                             html: `
                                 <div class="text-left text-xs space-y-2 p-2">
                                     <p class="font-semibold text-blue-600">Aplikasi MMYS telah diperbarui ke versi <b>${serverVer}</b>.</p>
@@ -252,7 +268,7 @@
                     }
                 }
             } catch (err) {
-                console.log("Versioning check bypassed (offline/no config).");
+                console.log("Versioning check bypassed.");
             }
         }
 
@@ -324,7 +340,7 @@
 
                 if (isDuplicateToday) {
                     const confirmRes = await Swal.fire({
-                        title: ' Data Sudah Ada!',
+                        title: 'Data Sudah Ada!',
                         text: `Peserta "${nama}" dari "${sekolah}" tercatat sudah melakukan skrining hari ini (${tglHariIni}). Ingin mengulang skrining baru?`,
                         icon: 'question',
                         showCancelButton: true,
@@ -399,14 +415,14 @@
             if(belumDiisi.length > 0) {
                 return Swal.fire({
                     title: 'Belum Lengkap!',
-                    html: `<div class="text-left text-sm p-2 text-rose-600 font-semibold">Silakan isi soal berikut:<br>• ${belumDiisi.join('<br>• ')}</div>`,
+                    html: `<div class="text-left text-sm p-2 text-rose-600 font-semibold">Silakan isi soal berikut:<br>â€¢ ${belumDiisi.join('<br>â€¢ ')}</div>`,
                     icon: 'warning'
                 });
             }
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin mr-2"></span> Memproses Skor...`;
+            btn.innerHTML = `<span class="animate-spin mr-2">ðŸŒ€</span> Memproses Skor...`;
 
             const getScore = (p) => {
                 let total = 0;
@@ -533,13 +549,13 @@
         function promptPinLock() {
             const currentMasterPin = getMasterPin();
             Swal.fire({
-                title: ' Masukkan Kata Sandi',
-                text: 'Akses Rekapan Data Terproteksi',
+                title: 'Kunci Terproteksi',
+                text: 'Masukkan Kata Sandi / PIN Rekapan Data',
                 html: `
                     <div class="relative w-full max-w-xs mx-auto mt-3">
                         <input type="password" id="pinInput" placeholder="Masukkan PIN..." class="w-full p-3 pr-10 text-center text-lg font-bold border-2 border-slate-300 rounded-xl focus:border-blue-500 outline-none">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 focus:outline-none text-lg">
-                            
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 focus:outline-none flex items-center">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                         </button>
                     </div>
                 `,
@@ -565,7 +581,7 @@
         function ubahPinAdminModal() {
             const currentMasterPin = getMasterPin();
             Swal.fire({
-                title: ' Ganti PIN Master Admin',
+                title: 'Ganti PIN Master Admin',
                 html: `
                     <div class="text-left space-y-3 p-2">
                         <div>
@@ -698,12 +714,24 @@
                 <div class="text-left space-y-3 md:space-y-4 text-slate-800 dark:text-slate-100">
                     <div class="flex justify-between items-center flex-wrap gap-2">
                         <div class="flex gap-1.5">
-                            <button onclick="forceRefreshData()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1"> Refresh</button>
-                            <button onclick="ubahPinAdminModal()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1"> Ganti PIN</button>
+                            <button onclick="forceRefreshData()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                                <span>Refresh</span>
+                            </button>
+                            <button onclick="ubahPinAdminModal()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+                                <span>Ganti PIN</span>
+                            </button>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg"> Auto-Deduplikasi Aktif</span>
-                            <button onclick="lockRekapanSession()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"> Kunci</button>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                                <svg class="w-3 h-3 fill-current text-emerald-600" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                                Auto-Deduplikasi Aktif
+                            </span>
+                            <button onclick="lockRekapanSession()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                                <span>Kunci</span>
+                            </button>
                         </div>
                     </div>
 
@@ -724,9 +752,9 @@
                             <label class="text-[10px] font-bold text-slate-500 uppercase">Status Gejala</label>
                             <select id="filterStatus" onchange="applyFilters()" class="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
                                 <option value="">Semua Status</option>
-                                <option value="berat"> Prioritas Rujukan (Gejala Berat)</option>
-                                <option value="ringan"> Gejala Ringan (Konseling)</option>
-                                <option value="normal"> Normal / Edukasi</option>
+                                <option value="berat">Prioritas Rujukan (Gejala Berat)</option>
+                                <option value="ringan">Gejala Ringan (Konseling)</option>
+                                <option value="normal">Normal / Edukasi</option>
                             </select>
                         </div>
                     </div>
@@ -749,7 +777,7 @@
                         </div>
                     </div>
 
-                    <!-- Visualisasi Grafik Interaktif (Donut Charts & Proporsi Bar Chart Antar-Sekolah) -->
+                    <!-- Visualisasi Grafik Interaktif -->
                     <div class="space-y-3">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
                             <div class="flex flex-col items-center">
@@ -768,7 +796,7 @@
 
                         <!-- Perbandingan Proporsi Kasus Antar-Sekolah -->
                         <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-2 text-center md:text-left"> Perbandingan Proporsi Kasus Antar-Sekolah</h5>
+                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-2 text-center md:text-left">Perbandingan Proporsi Kasus Antar-Sekolah</h5>
                             <div class="w-full h-52">
                                 <canvas id="chartSchoolComparison"></canvas>
                             </div>
@@ -797,16 +825,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS <span class="app-version-tag">${APP_VERSION}</span> • Puskesmas Sampanahan Digital</p>
+                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS <span class="app-version-tag">${APP_VERSION}</span> â€¢ Puskesmas Sampanahan Digital</p>
                 </div>
             `;
 
             Swal.fire({
-                title: ' Rekapan Data Skrining (Bebas Duplikat)',
+                title: 'Rekapan Data Skrining (Bebas Duplikat)',
                 html: contentHtml,
                 width: '980px',
                 showCancelButton: true,
-                confirmButtonText: ' Export Excel (Format Bersih)',
+                confirmButtonText: 'Export Excel (Format Bersih)',
                 cancelButtonText: 'Tutup',
                 confirmButtonColor: '#059669',
                 didOpen: () => {
@@ -962,10 +990,10 @@
             tbody.innerHTML = dataList.map((h, i) => {
                 const isSevere = (h.scoreA >= 2 || h.scoreB >= 2);
                 const flagBadge = isSevere 
-                    ? `<span class="badge-alert bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap"> RUJUKAN</span>` 
+                    ? `<span class="badge-alert bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1 w-fit"><svg class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>RUJUKAN</span>` 
                     : (h.scoreA === 1 || h.scoreB === 1)
-                    ? `<span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"> KONSELING</span>`
-                    : `<span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"> STABIL</span>`;
+                    ? `<span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1 w-fit"><svg class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>KONSELING</span>`
+                    : `<span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1 w-fit"><svg class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>STABIL</span>`;
 
                 const rowBg = isSevere 
                     ? 'bg-rose-50/60 dark:bg-rose-950/20 font-medium' 
@@ -986,10 +1014,19 @@
                         <td class="p-3 text-[11px] font-semibold whitespace-nowrap ${isSevere ? 'text-rose-600' : 'text-slate-600 dark:text-slate-300'}">${h.rekomendasi}</td>
                         <td class="p-3 text-center whitespace-nowrap">
                             <div class="flex gap-1 justify-center items-center">
-                                <button onclick="kirimWhatsAppHasil('${safeItem}')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow" title="Kirim WA"> WA</button>
-                                <button onclick="lihatDetailPesertaModal('${safeItem}')" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[10px] font-bold shadow" title="Lihat Detail"></button>
-                                <button onclick="editDataPesertaModal('${safeItem}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow" title="Edit Data"></button>
-                                <button onclick="hapusDataPeserta('${h.id}', '${encodeURIComponent(h.nama)}')" class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold shadow" title="Hapus Data"></button>
+                                <button onclick="kirimWhatsAppHasil('${safeItem}')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow flex items-center gap-1" title="Kirim WA">
+                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                                    WA
+                                </button>
+                                <button onclick="lihatDetailPesertaModal('${safeItem}')" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[10px] font-bold shadow flex items-center" title="Lihat Detail">
+                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                                </button>
+                                <button onclick="editDataPesertaModal('${safeItem}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow flex items-center" title="Edit Data">
+                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                </button>
+                                <button onclick="hapusDataPeserta('${h.id}', '${encodeURIComponent(h.nama)}')" class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold shadow flex items-center" title="Hapus Data">
+                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -1006,7 +1043,7 @@
             ).join('');
 
             Swal.fire({
-                title: ' Edit Data Peserta',
+                title: 'Edit Data Peserta',
                 html: `
                     <div class="text-left space-y-3 p-2">
                         <div>
@@ -1026,7 +1063,7 @@
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: ' Simpan Perubahan',
+                confirmButtonText: 'Simpan Perubahan',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#2563eb',
                 preConfirm: () => {
@@ -1096,7 +1133,7 @@
                 text: `Apakah Anda yakin ingin menghapus data skrining milik "${nama}"? Data yang terhapus tidak dapat dipulihkan.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: ' Ya, Hapus',
+                confirmButtonText: 'Ya, Hapus',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#e11d48'
             }).then(async (res) => {
@@ -1138,13 +1175,13 @@
         function kirimWhatsAppHasil(safeItemEncoded) {
             const item = JSON.parse(decodeURIComponent(safeItemEncoded));
             const pesan = `*HASIL SKRINING KESEHATAN MENTAL MMYS*\n*UPTD PUSKESMAS SAMPANAHAN*\n-----------------------------------\n` +
-                          `• *Nama Peserta:* ${item.nama}\n` +
-                          `• *Asal Sekolah:* ${item.sekolah}\n` +
-                          `• *Usia:* ${item.usia} Tahun\n` +
-                          `• *Tanggal Skrining:* ${item.tanggal}\n` +
-                          `• *Skala Ansietas:* ${item.scoreA}/3 (${item.interA ? item.interA.text : '-'})\n` +
-                          `• *Skala Depresi:* ${item.scoreB}/3 (${item.interB ? item.interB.text : '-'})\n` +
-                          `• *Rekomendasi:* ${item.rekomendasi}\n` +
+                          `â€¢ *Nama Peserta:* ${item.nama}\n` +
+                          `â€¢ *Asal Sekolah:* ${item.sekolah}\n` +
+                          `â€¢ *Usia:* ${item.usia} Tahun\n` +
+                          `â€¢ *Tanggal Skrining:* ${item.tanggal}\n` +
+                          `â€¢ *Skala Ansietas:* ${item.scoreA}/3 (${item.interA ? item.interA.text : '-'})\n` +
+                          `â€¢ *Skala Depresi:* ${item.scoreB}/3 (${item.interB ? item.interB.text : '-'})\n` +
+                          `â€¢ *Rekomendasi:* ${item.rekomendasi}\n` +
                           `-----------------------------------\n` +
                           `_Pesan otomatis dari Sistem Digital MMYS Puskesmas Sampanahan_`;
 
@@ -1156,7 +1193,7 @@
         function lihatDetailPesertaModal(safeItemEncoded) {
             const item = JSON.parse(decodeURIComponent(safeItemEncoded));
             Swal.fire({
-                title: ' Detail Skrining Peserta',
+                title: 'Detail Skrining Peserta',
                 html: `
                     <div class="text-left text-xs space-y-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
                         <p><b>ID Transaksi:</b> <span class="font-mono text-[11px]">${item.id}</span></p>
