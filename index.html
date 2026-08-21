@@ -35,18 +35,19 @@
 
     <!-- Navigasi Atas -->
     <div class="fixed top-3 right-3 flex gap-2 no-print z-50">
-        <button onclick="handleRekapanAccess()" class="p-2.5 md:p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">📊 Rekapan</button>
-        <button onclick="toggleDarkMode()" class="p-2.5 md:p-3 rounded-full glass hover:scale-110 transition shadow-lg">🌙</button>
+        <button onclick="handleRekapanAccess()" class="p-2.5 md:p-3 rounded-full glass hover:scale-105 transition shadow-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700"> Rekapan</button>
+        <button onclick="toggleDarkMode()" class="p-2.5 md:p-3 rounded-full glass hover:scale-110 transition shadow-lg"></button>
     </div>
 
     <div id="app" class="w-full max-w-4xl glass rounded-[28px] md:rounded-[32px] p-4 md:p-10 relative overflow-hidden shadow-2xl mt-10 md:mt-0">
         
         <!-- Landing Page -->
         <div id="step-landing" class="text-center py-6 md:py-10 animate-fade">
-            <div class="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-                Versi <span class="app-version-tag">V.1.2.2 PRO</span> • Firebase Direct Cloud
+            <div class="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                Versi <span class="app-version-tag">V.1.2.3 PRO</span> � Cloud Auto-Sync
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.2 PRO</span></h1>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.3 PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-6 md:mb-8 italic text-xs md:text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
             
             <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-5 md:p-6 rounded-3xl border border-white">
@@ -56,26 +57,29 @@
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Asal Sekolah / Madrasah</label>
-                    <input type="text" id="initSekolah" list="schoolOptionsList" placeholder="Pilih atau ketik asal sekolah..." class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none">
-                    <datalist id="schoolOptionsList">
-                        <!-- Jenjang SMA / MA / Sederajat -->
-                        <option value="SMAN 1 Sampanahan">
-                        <option value="SMAN 2 Sampanahan">
-                        <!-- Jenjang SMP / MTs / Sederajat -->
-                        <option value="SMP Negeri 1 Sampanahan">
-                        <option value="SMP Negeri 2 Sampanahan">
-                        <option value="SMP IT Raudhatul Aminin">
-                        <option value="MTsS Darul Ulum Sukamaju">
-                        <option value="MTsS SA Miftahul Khair">
-                        <!-- Jenjang SD / MI / Sederajat -->
-                        <option value="SDN 1 Gunung Batu Besar">
-                        <option value="SDN 1 Sungai Nyamuk">
-                        <option value="SDN 2 Sungai Nyamuk">
-                        <option value="SDN Sampanahan">
-                        <option value="SDN Sungai Betung">
-                        <option value="SD Swasta Safir">
-                        <option value="MIS Raudhatul Aminin">
-                    </datalist>
+                    <select id="initSekolah" class="p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none text-xs md:text-sm">
+                        <option value="">-- Pilih Asal Sekolah --</option>
+                        <optgroup label="Jenjang SMA / MA / Sederajat">
+                            <option value="SMAN 1 Sampanahan">SMAN 1 Sampanahan</option>
+                            <option value="SMAN 2 Sampanahan">SMAN 2 Sampanahan</option>
+                        </optgroup>
+                        <optgroup label="Jenjang SMP / MTs / Sederajat">
+                            <option value="SMP Negeri 1 Sampanahan">SMP Negeri 1 Sampanahan</option>
+                            <option value="SMP Negeri 2 Sampanahan">SMP Negeri 2 Sampanahan</option>
+                            <option value="SMP IT Raudhatul Aminin">SMP IT Raudhatul Aminin</option>
+                            <option value="MTsS Darul Ulum Sukamaju">MTsS Darul Ulum Sukamaju</option>
+                            <option value="MTsS SA Miftahul Khair">MTsS SA Miftahul Khair</option>
+                        </optgroup>
+                        <optgroup label="Jenjang SD / MI / Sederajat">
+                            <option value="SDN 1 Gunung Batu Besar">SDN 1 Gunung Batu Besar</option>
+                            <option value="SDN 1 Sungai Nyamuk">SDN 1 Sungai Nyamuk</option>
+                            <option value="SDN 2 Sungai Nyamuk">SDN 2 Sungai Nyamuk</option>
+                            <option value="SDN Sampanahan">SDN Sampanahan</option>
+                            <option value="SDN Sungai Betung">SDN Sungai Betung</option>
+                            <option value="SD Swasta Safir">SD Swasta Safir</option>
+                            <option value="MIS Raudhatul Aminin">MIS Raudhatul Aminin</option>
+                        </optgroup>
+                    </select>
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Usia (7-18 Tahun)</label>
@@ -85,7 +89,7 @@
                     Mulai Skrining Sekarang
                 </button>
                 <button onclick="handleRekapanAccess()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow flex justify-center items-center gap-2 text-xs">
-                    🔒 Lihat Rekapan Firebase Data
+                     Lihat Rekapan Firebase Data
                 </button>
             </div>
         </div>
@@ -114,15 +118,15 @@
         <!-- Result Section -->
         <div id="result-section" class="hidden animate-fade pt-2">
             <div class="flex justify-between items-center no-print mb-6">
-                <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600">← Kembali</button>
+                <button onclick="location.reload()" class="text-sm text-slate-500 flex items-center gap-2 hover:text-blue-600"> Kembali</button>
                 <div class="flex gap-2">
                     <span id="sync-status" class="text-[10px] self-center px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold uppercase tracking-tighter">Menyimpan...</span>
-                    <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-3 md:px-4 py-2 rounded-xl text-xs font-bold">📊 Excel</button>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-3 md:px-4 py-2 rounded-xl text-xs font-bold"> Excel</button>
                 </div>
             </div>
             
             <div id="print-area" class="text-center">
-                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.2 PRO</span></h2>
+                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.3 PRO</span></h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8 text-sm p-4 md:p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
                     <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
@@ -147,21 +151,48 @@
 
                 <div class="mt-6 md:mt-8 py-6 border-t border-dashed border-slate-300">
                     <div id="qrcode" class="flex justify-center mb-2"></div>
-                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.2 PRO</span></p>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.3 PRO</span></p>
                 </div>
             </div>
 
-            <button onclick="window.print()" class="no-print w-full mt-6 bg-white border-2 border-slate-800 text-slate-800 font-bold py-3 rounded-xl">🖨️ Cetak Hasil</button>
+            <button onclick="window.print()" class="no-print w-full mt-6 bg-white border-2 border-slate-800 text-slate-800 font-bold py-3 rounded-xl"> Cetak Hasil</button>
         </div>
     </div>
 
     <script>
-        // ================= KONFIGURASI DATABASE =================
+        // ================= DAFTAR RESMI SEKOLAH PUSKESMAS =================
+        const DAFTAR_SEKOLAH_PILIHAN = [
+            "SMAN 1 Sampanahan",
+            "SMAN 2 Sampanahan",
+            "SMP Negeri 1 Sampanahan",
+            "SMP Negeri 2 Sampanahan",
+            "SMP IT Raudhatul Aminin",
+            "MTsS Darul Ulum Sukamaju",
+            "MTsS SA Miftahul Khair",
+            "SDN 1 Gunung Batu Besar",
+            "SDN 1 Sungai Nyamuk",
+            "SDN 2 Sungai Nyamuk",
+            "SDN Sampanahan",
+            "SDN Sungai Betung",
+            "SD Swasta Safir",
+            "MIS Raudhatul Aminin"
+        ];
+
+        // ================= KONFIGURASI DATABASE & VERSIONING =================
         const FIREBASE_REST_URL = "https://mmys-50bf7-default-rtdb.asia-southeast1.firebasedatabase.app";
         const DB_COLLECTION = "skrining_mmys";
+        const CONFIG_COLLECTION = "app_config";
         
-        let APP_VERSION = "V.1.2.2 PRO";
-        const REKAPAN_PIN = "1234"; 
+        let APP_VERSION = "V.1.2.3 PRO";
+        const DEFAULT_PIN = "1234";
+
+        function getMasterPin() {
+            return localStorage.getItem('MMYS_ADMIN_PIN') || DEFAULT_PIN;
+        }
+
+        function setMasterPin(newPin) {
+            localStorage.setItem('MMYS_ADMIN_PIN', newPin);
+        }
 
         let currentMode = '', lastResult = null;
         let isRekapanUnlocked = false; 
@@ -169,11 +200,61 @@
         let activeFilteredData = [];
         let chartAnxInstance = null;
         let chartDepInstance = null;
+        let chartSchoolInstance = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             updateVersionDisplay();
-            try { localStorage.clear(); } catch(e) {}
+            checkAppVersionAuto();
+            try {
+                const savedPin = localStorage.getItem('MMYS_ADMIN_PIN');
+                if (!savedPin) localStorage.setItem('MMYS_ADMIN_PIN', DEFAULT_PIN);
+            } catch(e) {}
         });
+
+        // ================= FITUR AUTO-UPDATE & NOTIFIKASI VERSI TERBARU =================
+        async function checkAppVersionAuto() {
+            try {
+                const res = await fetch(`${FIREBASE_REST_URL}/${CONFIG_COLLECTION}.json`);
+                if (!res.ok) return;
+
+                const config = await res.json();
+                if (config && config.version) {
+                    const serverVer = config.version;
+                    const changeLog = config.changelog || 'Peningkatan stabilitas performa sistem dan pembaruan database.';
+
+                    if (serverVer !== APP_VERSION) {
+                        APP_VERSION = serverVer;
+                        updateVersionDisplay();
+
+                        Swal.fire({
+                            title: ' Sistem Diperbarui!',
+                            html: `
+                                <div class="text-left text-xs space-y-2 p-2">
+                                    <p class="font-semibold text-blue-600">Aplikasi MMYS telah diperbarui ke versi <b>${serverVer}</b>.</p>
+                                    <div class="bg-slate-100 dark:bg-slate-800 p-2.5 rounded-xl text-slate-600 dark:text-slate-300">
+                                        <b>Catatan Pembaruan:</b><br>${changeLog}
+                                    </div>
+                                    <p class="text-[10px] text-slate-400">Petugas Puskesmas siap menggunakan fitur termutakhir.</p>
+                                </div>
+                            `,
+                            icon: 'info',
+                            confirmButtonText: 'Segarkan Halaman',
+                            confirmButtonColor: '#2563eb',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            if ('caches' in window) {
+                                caches.keys().then(names => {
+                                    for (let name of names) caches.delete(name);
+                                });
+                            }
+                            location.reload(true);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.log("Versioning check bypassed (offline/no config).");
+            }
+        }
 
         function updateVersionDisplay() {
             document.querySelectorAll('.app-version-tag').forEach(el => el.innerText = APP_VERSION);
@@ -223,15 +304,39 @@
 
         function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
 
-        function checkAutoMode() {
+        async function checkAutoMode() {
             const nama = document.getElementById('initNama').value.trim();
-            const rawSekolah = document.getElementById('initSekolah').value.trim();
+            const rawSekolah = document.getElementById('initSekolah').value;
             const sekolah = normalizeSchoolName(rawSekolah);
             const usia = parseInt(document.getElementById('initUsia').value);
             
-            if(!nama || !rawSekolah || isNaN(usia)) return Swal.fire('Error', 'Harap lengkapi Nama, Asal Sekolah, dan Usia terlebih dahulu', 'error');
+            if(!nama || !rawSekolah || isNaN(usia)) return Swal.fire('Error', 'Harap lengkapi Nama, Pilih Asal Sekolah, dan Isi Usia terlebih dahulu', 'error');
             if(usia < 7 || usia > 18) return Swal.fire('Error', 'Usia harus 7-18 tahun', 'warning');
             
+            const tglHariIni = new Date().toLocaleDateString('id-ID');
+
+            if (cachedRekapanData && cachedRekapanData.length > 0) {
+                const isDuplicateToday = cachedRekapanData.some(d => 
+                    d.nama.toLowerCase() === nama.toLowerCase() && 
+                    d.sekolah.toLowerCase() === sekolah.toLowerCase() && 
+                    d.tanggal === tglHariIni
+                );
+
+                if (isDuplicateToday) {
+                    const confirmRes = await Swal.fire({
+                        title: ' Data Sudah Ada!',
+                        text: `Peserta "${nama}" dari "${sekolah}" tercatat sudah melakukan skrining hari ini (${tglHariIni}). Ingin mengulang skrining baru?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Lanjutkan',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#2563eb'
+                    });
+
+                    if (!confirmRes.isConfirmed) return;
+                }
+            }
+
             currentMode = (usia <= 9) ? 'anak' : 'remaja';
             renderQuestions();
         }
@@ -294,14 +399,14 @@
             if(belumDiisi.length > 0) {
                 return Swal.fire({
                     title: 'Belum Lengkap!',
-                    html: `<div class="text-left text-sm p-2 text-rose-600 font-semibold">Silakan isi soal berikut:<br>• ${belumDiisi.join('<br>• ')}</div>`,
+                    html: `<div class="text-left text-sm p-2 text-rose-600 font-semibold">Silakan isi soal berikut:<br>� ${belumDiisi.join('<br>� ')}</div>`,
                     icon: 'warning'
                 });
             }
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin mr-2">🌀</span> Memproses Skor...`;
+            btn.innerHTML = `<span class="animate-spin mr-2"></span> Memproses Skor...`;
 
             const getScore = (p) => {
                 let total = 0;
@@ -426,14 +531,15 @@
         }
 
         function promptPinLock() {
+            const currentMasterPin = getMasterPin();
             Swal.fire({
-                title: '🔒 Masukkan Kata Sandi',
+                title: ' Masukkan Kata Sandi',
                 text: 'Akses Rekapan Data Terproteksi',
                 html: `
                     <div class="relative w-full max-w-xs mx-auto mt-3">
                         <input type="password" id="pinInput" placeholder="Masukkan PIN..." class="w-full p-3 pr-10 text-center text-lg font-bold border-2 border-slate-300 rounded-xl focus:border-blue-500 outline-none">
                         <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 focus:outline-none text-lg">
-                            👁️
+                            
                         </button>
                     </div>
                 `,
@@ -443,15 +549,57 @@
                 confirmButtonColor: '#2563eb',
                 preConfirm: () => {
                     const pin = document.getElementById('pinInput').value;
-                    if (pin !== REKAPAN_PIN) {
+                    if (pin !== currentMasterPin) {
                         Swal.showValidationMessage('Kata Sandi / PIN Salah!');
                     }
-                    return pin === REKAPAN_PIN;
+                    return pin === currentMasterPin;
                 }
             }).then(res => {
                 if (res.isConfirmed) {
                     isRekapanUnlocked = true; 
                     showRekapanModal();
+                }
+            });
+        }
+
+        function ubahPinAdminModal() {
+            const currentMasterPin = getMasterPin();
+            Swal.fire({
+                title: ' Ganti PIN Master Admin',
+                html: `
+                    <div class="text-left space-y-3 p-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">PIN Lama</label>
+                            <input type="password" id="oldPin" placeholder="Masukkan PIN lama..." class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase">PIN Baru</label>
+                            <input type="password" id="newPin" placeholder="Minimal 4 digit..." class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan PIN Baru',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#2563eb',
+                preConfirm: () => {
+                    const oldP = document.getElementById('oldPin').value;
+                    const newP = document.getElementById('newPin').value;
+
+                    if (oldP !== currentMasterPin) {
+                        Swal.showValidationMessage('PIN lama salah!');
+                        return false;
+                    }
+                    if (!newP || newP.length < 4) {
+                        Swal.showValidationMessage('PIN baru minimal 4 digit!');
+                        return false;
+                    }
+                    return newP;
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    setMasterPin(res.value);
+                    Swal.fire('Berhasil!', 'PIN Admin berhasil diubah.', 'success');
                 }
             });
         }
@@ -493,7 +641,6 @@
                     return Swal.fire('Rekapan Kosong', 'Belum ada data skrining terdaftar di database.', 'info');
                 }
 
-                // 1. Parsing dan normalisasi seluruh data
                 const parsedList = Object.values(rawData).map(d => {
                     const val = Object.values(d);
                     const nama = (d.nama || d['Nama Peserta'] || d.name || (typeof val[1] === 'string' ? val[1] : '-') || '-').trim();
@@ -519,10 +666,8 @@
                     };
                 });
 
-                // 2. Urutkan waktu dari yang paling baru ke paling lama
                 parsedList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-                // 3. Algoritma Anti-Duplikat: Pertahankan hanya 1 data paling baru per siswa di sekolah yang sama
                 const uniqueMap = new Map();
                 parsedList.forEach(item => {
                     const uniqueKey = `${item.nama.toLowerCase()}_${item.sekolah.toLowerCase()}`;
@@ -552,10 +697,13 @@
             const contentHtml = `
                 <div class="text-left space-y-3 md:space-y-4 text-slate-800 dark:text-slate-100">
                     <div class="flex justify-between items-center flex-wrap gap-2">
-                        <button onclick="forceRefreshData()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">🔄 Refresh Data</button>
+                        <div class="flex gap-1.5">
+                            <button onclick="forceRefreshData()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1"> Refresh</button>
+                            <button onclick="ubahPinAdminModal()" class="text-xs bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1"> Ganti PIN</button>
+                        </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg">✨ Auto-Deduplikasi Aktif</span>
-                            <button onclick="lockRekapanSession()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">🔒 Kunci</button>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg"> Auto-Deduplikasi Aktif</span>
+                            <button onclick="lockRekapanSession()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"> Kunci</button>
                         </div>
                     </div>
 
@@ -576,9 +724,9 @@
                             <label class="text-[10px] font-bold text-slate-500 uppercase">Status Gejala</label>
                             <select id="filterStatus" onchange="applyFilters()" class="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
                                 <option value="">Semua Status</option>
-                                <option value="berat">🚨 Prioritas Rujukan (Gejala Berat)</option>
-                                <option value="ringan">⚠️ Gejala Ringan (Konseling)</option>
-                                <option value="normal">✅ Normal / Edukasi</option>
+                                <option value="berat"> Prioritas Rujukan (Gejala Berat)</option>
+                                <option value="ringan"> Gejala Ringan (Konseling)</option>
+                                <option value="normal"> Normal / Edukasi</option>
                             </select>
                         </div>
                     </div>
@@ -601,18 +749,28 @@
                         </div>
                     </div>
 
-                    <!-- Visualisasi Grafik Interaktif -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-                        <div class="flex flex-col items-center">
-                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Distribusi Ansietas</h5>
-                            <div class="w-36 h-36 md:w-40 md:h-40">
-                                <canvas id="chartAnsietas"></canvas>
+                    <!-- Visualisasi Grafik Interaktif (Donut Charts & Proporsi Bar Chart Antar-Sekolah) -->
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="flex flex-col items-center">
+                                <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Distribusi Ansietas</h5>
+                                <div class="w-36 h-36 md:w-40 md:h-40">
+                                    <canvas id="chartAnsietas"></canvas>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Distribusi Depresi</h5>
+                                <div class="w-36 h-36 md:w-40 md:h-40">
+                                    <canvas id="chartDepresi"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex flex-col items-center">
-                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Distribusi Depresi</h5>
-                            <div class="w-36 h-36 md:w-40 md:h-40">
-                                <canvas id="chartDepresi"></canvas>
+
+                        <!-- Perbandingan Proporsi Kasus Antar-Sekolah -->
+                        <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <h5 class="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-2 text-center md:text-left"> Perbandingan Proporsi Kasus Antar-Sekolah</h5>
+                            <div class="w-full h-52">
+                                <canvas id="chartSchoolComparison"></canvas>
                             </div>
                         </div>
                     </div>
@@ -639,16 +797,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS <span class="app-version-tag">${APP_VERSION}</span> • Puskesmas Sampanahan Digital</p>
+                    <p class="text-[10px] text-slate-400 text-center font-semibold">MMYS <span class="app-version-tag">${APP_VERSION}</span> � Puskesmas Sampanahan Digital</p>
                 </div>
             `;
 
             Swal.fire({
-                title: '📊 Rekapan Data Skrining (Bebas Duplikat)',
+                title: ' Rekapan Data Skrining (Bebas Duplikat)',
                 html: contentHtml,
                 width: '980px',
                 showCancelButton: true,
-                confirmButtonText: '📥 Export Excel (Format Bersih)',
+                confirmButtonText: ' Export Excel (Format Bersih)',
                 cancelButtonText: 'Tutup',
                 confirmButtonColor: '#059669',
                 didOpen: () => {
@@ -665,12 +823,14 @@
         function initCharts() {
             const ctxA = document.getElementById('chartAnsietas');
             const ctxB = document.getElementById('chartDepresi');
-            if (!ctxA || !ctxB) return;
+            const ctxSchool = document.getElementById('chartSchoolComparison');
+            if (!ctxA || !ctxB || !ctxSchool) return;
 
             if (chartAnxInstance) chartAnxInstance.destroy();
             if (chartDepInstance) chartDepInstance.destroy();
+            if (chartSchoolInstance) chartSchoolInstance.destroy();
 
-            const chartConfig = () => ({
+            const donutConfig = () => ({
                 type: 'doughnut',
                 data: {
                     labels: ['Normal', 'Ringan', 'Berat'],
@@ -689,8 +849,31 @@
                 }
             });
 
-            chartAnxInstance = new Chart(ctxA, chartConfig());
-            chartDepInstance = new Chart(ctxB, chartConfig());
+            chartAnxInstance = new Chart(ctxA, donutConfig());
+            chartDepInstance = new Chart(ctxB, donutConfig());
+
+            chartSchoolInstance = new Chart(ctxSchool, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Normal / Stabil', data: [], backgroundColor: '#10b981' },
+                        { label: 'Gejala Ringan', data: [], backgroundColor: '#f59e0b' },
+                        { label: 'Gejala Berat (Rujukan)', data: [], backgroundColor: '#f43f5e' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, ticks: { font: { size: 9 } } },
+                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 9 } } }
+                    }
+                }
+            });
         }
 
         function applyFilters() {
@@ -728,9 +911,24 @@
             let anxNormal = 0, anxRingan = 0, anxBerat = 0;
             let depNormal = 0, depRingan = 0, depBerat = 0;
 
+            const schoolAgg = {};
+
             dataList.forEach(h => {
                 if (h.scoreA >= 2) anxBerat++; else if (h.scoreA === 1) anxRingan++; else anxNormal++;
                 if (h.scoreB >= 2) depBerat++; else if (h.scoreB === 1) depRingan++; else depNormal++;
+
+                const sch = h.sekolah || 'Lainnya';
+                if (!schoolAgg[sch]) {
+                    schoolAgg[sch] = { normal: 0, ringan: 0, berat: 0 };
+                }
+
+                if (h.scoreA >= 2 || h.scoreB >= 2) {
+                    schoolAgg[sch].berat++;
+                } else if (h.scoreA === 1 || h.scoreB === 1) {
+                    schoolAgg[sch].ringan++;
+                } else {
+                    schoolAgg[sch].normal++;
+                }
             });
 
             document.getElementById('statTotal').innerText = dataList.length;
@@ -747,6 +945,15 @@
                 chartDepInstance.update();
             }
 
+            if (chartSchoolInstance) {
+                const schoolLabels = Object.keys(schoolAgg);
+                chartSchoolInstance.data.labels = schoolLabels;
+                chartSchoolInstance.data.datasets[0].data = schoolLabels.map(s => schoolAgg[s].normal);
+                chartSchoolInstance.data.datasets[1].data = schoolLabels.map(s => schoolAgg[s].ringan);
+                chartSchoolInstance.data.datasets[2].data = schoolLabels.map(s => schoolAgg[s].berat);
+                chartSchoolInstance.update();
+            }
+
             if (dataList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-xs text-slate-400 font-medium">Tidak ada data skrining yang cocok</td></tr>`;
                 return;
@@ -755,10 +962,10 @@
             tbody.innerHTML = dataList.map((h, i) => {
                 const isSevere = (h.scoreA >= 2 || h.scoreB >= 2);
                 const flagBadge = isSevere 
-                    ? `<span class="badge-alert bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap">🚨 RUJUKAN</span>` 
+                    ? `<span class="badge-alert bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap"> RUJUKAN</span>` 
                     : (h.scoreA === 1 || h.scoreB === 1)
-                    ? `<span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">⚠️ KONSELING</span>`
-                    : `<span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">✅ STABIL</span>`;
+                    ? `<span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"> KONSELING</span>`
+                    : `<span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"> STABIL</span>`;
 
                 const rowBg = isSevere 
                     ? 'bg-rose-50/60 dark:bg-rose-950/20 font-medium' 
@@ -779,10 +986,10 @@
                         <td class="p-3 text-[11px] font-semibold whitespace-nowrap ${isSevere ? 'text-rose-600' : 'text-slate-600 dark:text-slate-300'}">${h.rekomendasi}</td>
                         <td class="p-3 text-center whitespace-nowrap">
                             <div class="flex gap-1 justify-center items-center">
-                                <button onclick="kirimWhatsAppHasil('${safeItem}')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow" title="Kirim WA">💬 WA</button>
-                                <button onclick="lihatDetailPesertaModal('${safeItem}')" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[10px] font-bold shadow" title="Lihat Detail">🔍</button>
-                                <button onclick="editDataPesertaModal('${safeItem}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow" title="Edit Data">✏️</button>
-                                <button onclick="hapusDataPeserta('${h.id}', '${encodeURIComponent(h.nama)}')" class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold shadow" title="Hapus Data">🗑️</button>
+                                <button onclick="kirimWhatsAppHasil('${safeItem}')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow" title="Kirim WA"> WA</button>
+                                <button onclick="lihatDetailPesertaModal('${safeItem}')" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[10px] font-bold shadow" title="Lihat Detail"></button>
+                                <button onclick="editDataPesertaModal('${safeItem}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow" title="Edit Data"></button>
+                                <button onclick="hapusDataPeserta('${h.id}', '${encodeURIComponent(h.nama)}')" class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold shadow" title="Hapus Data"></button>
                             </div>
                         </td>
                     </tr>
@@ -794,8 +1001,12 @@
         function editDataPesertaModal(safeItemEncoded) {
             const item = JSON.parse(decodeURIComponent(safeItemEncoded));
             
+            const schoolOptionsHtml = DAFTAR_SEKOLAH_PILIHAN.map(s => 
+                `<option value="${s}" ${s === item.sekolah ? 'selected' : ''}>${s}</option>`
+            ).join('');
+
             Swal.fire({
-                title: '✏️ Edit Data Peserta',
+                title: ' Edit Data Peserta',
                 html: `
                     <div class="text-left space-y-3 p-2">
                         <div>
@@ -804,7 +1015,9 @@
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-slate-500 uppercase">Asal Sekolah</label>
-                            <input type="text" id="editSekolah" list="schoolOptionsList" value="${item.sekolah}" class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                            <select id="editSekolah" class="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 outline-none">
+                                ${schoolOptionsHtml}
+                            </select>
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-slate-500 uppercase">Usia (Tahun)</label>
@@ -813,12 +1026,12 @@
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: '💾 Simpan Perubahan',
+                confirmButtonText: ' Simpan Perubahan',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#2563eb',
                 preConfirm: () => {
                     const newNama = document.getElementById('editNama').value.trim();
-                    const newSekolah = normalizeSchoolName(document.getElementById('editSekolah').value.trim());
+                    const newSekolah = normalizeSchoolName(document.getElementById('editSekolah').value);
                     const newUsia = parseInt(document.getElementById('editUsia').value);
 
                     if (!newNama || !newSekolah || isNaN(newUsia)) {
@@ -883,7 +1096,7 @@
                 text: `Apakah Anda yakin ingin menghapus data skrining milik "${nama}"? Data yang terhapus tidak dapat dipulihkan.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: '🗑️ Ya, Hapus',
+                confirmButtonText: ' Ya, Hapus',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#e11d48'
             }).then(async (res) => {
@@ -925,13 +1138,13 @@
         function kirimWhatsAppHasil(safeItemEncoded) {
             const item = JSON.parse(decodeURIComponent(safeItemEncoded));
             const pesan = `*HASIL SKRINING KESEHATAN MENTAL MMYS*\n*UPTD PUSKESMAS SAMPANAHAN*\n-----------------------------------\n` +
-                          `• *Nama Peserta:* ${item.nama}\n` +
-                          `• *Asal Sekolah:* ${item.sekolah}\n` +
-                          `• *Usia:* ${item.usia} Tahun\n` +
-                          `• *Tanggal Skrining:* ${item.tanggal}\n` +
-                          `• *Skala Ansietas:* ${item.scoreA}/3 (${item.interA ? item.interA.text : '-'})\n` +
-                          `• *Skala Depresi:* ${item.scoreB}/3 (${item.interB ? item.interB.text : '-'})\n` +
-                          `• *Rekomendasi:* ${item.rekomendasi}\n` +
+                          `� *Nama Peserta:* ${item.nama}\n` +
+                          `� *Asal Sekolah:* ${item.sekolah}\n` +
+                          `� *Usia:* ${item.usia} Tahun\n` +
+                          `� *Tanggal Skrining:* ${item.tanggal}\n` +
+                          `� *Skala Ansietas:* ${item.scoreA}/3 (${item.interA ? item.interA.text : '-'})\n` +
+                          `� *Skala Depresi:* ${item.scoreB}/3 (${item.interB ? item.interB.text : '-'})\n` +
+                          `� *Rekomendasi:* ${item.rekomendasi}\n` +
                           `-----------------------------------\n` +
                           `_Pesan otomatis dari Sistem Digital MMYS Puskesmas Sampanahan_`;
 
@@ -943,7 +1156,7 @@
         function lihatDetailPesertaModal(safeItemEncoded) {
             const item = JSON.parse(decodeURIComponent(safeItemEncoded));
             Swal.fire({
-                title: '📋 Detail Skrining Peserta',
+                title: ' Detail Skrining Peserta',
                 html: `
                     <div class="text-left text-xs space-y-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
                         <p><b>ID Transaksi:</b> <span class="font-mono text-[11px]">${item.id}</span></p>
