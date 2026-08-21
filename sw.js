@@ -1,9 +1,10 @@
-// NAMA CACHE DINAMIS (Ubah angka versi jika ingin paksa pembaruan total)
-const CACHE_NAME = 'mmys-cache-v1.2.4';
+const CACHE_NAME = 'mmys-cache-v1.2.5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
@@ -11,24 +12,19 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
-// 1. Install & Langsung Aktifkan Service Worker Baru (Skip Waiting)
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
 });
 
-// 2. Bersihkan Cache Versi Lama Secara Otomatis
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[PWA] Menghapus Cache Lama:', cache);
             return caches.delete(cache);
           }
         })
@@ -37,21 +33,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Strategi Network First (Coba Jaringan Baru Dulu, Fallback ke Cache jika Offline)
 self.addEventListener('fetch', (event) => {
-  // Abaikan request ke Firebase API agar selalu real-time
-  if (event.request.url.includes('firebasedatabase.app')) {
-    return;
-  }
+  if (event.request.url.includes('firebasedatabase.app')) return;
 
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
           const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
         }
         return networkResponse;
       })

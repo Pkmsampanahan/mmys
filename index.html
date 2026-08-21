@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MMYS PRO - Sistem Skrining Puskesmas</title>
     
-    <!-- PWA Primary Meta Tags -->
+    <!-- PWA Primary Meta Tags & Favicon Lokal GitHub -->
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MMYS PRO">
     <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+    <link rel="icon" type="image/png" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -42,12 +43,10 @@
 </head>
 <body class="p-3 md:p-8 flex flex-col justify-start items-center">
 
-    <!-- Banner Prompt Install PWA (Otomatis Muncul jika belum terinstall) -->
+    <!-- Banner Prompt Install PWA -->
     <div id="pwa-install-banner" class="hidden w-full max-w-4xl bg-blue-600 text-white p-3.5 rounded-2xl mb-4 shadow-xl flex justify-between items-center no-print z-50">
         <div class="flex items-center gap-3">
-            <div class="p-2 bg-white/20 rounded-xl">
-                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-            </div>
+            <img src="./icon-192.png" alt="Logo" class="w-10 h-10 rounded-xl shadow border border-white/30 object-cover" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2966/2966327.png'">
             <div>
                 <p class="text-xs font-bold leading-tight">Pasang Aplikasi MMYS PRO</p>
                 <p class="text-[10px] opacity-80">Akses lebih cepat & ringan langsung dari layar utama</p>
@@ -73,12 +72,17 @@
     <div id="app" class="w-full max-w-4xl glass rounded-[28px] md:rounded-[32px] p-4 md:p-10 relative overflow-hidden shadow-2xl mt-10 md:mt-0">
         
         <!-- Landing Page -->
-        <div id="step-landing" class="text-center py-6 md:py-10 animate-fade">
-            <div class="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                Versi <span class="app-version-tag">V.1.2.4 PRO</span> • PWA Auto-Sync
+        <div id="step-landing" class="text-center py-6 md:py-8 animate-fade">
+            <!-- Tampilan Logo di Halaman Awal -->
+            <div class="flex justify-center mb-3">
+                <img src="./icon-192.png" alt="Logo MMYS" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl shadow-lg border-2 border-white/60 object-cover" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2966/2966327.png'">
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.4 PRO</span></h1>
+
+            <div class="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                Versi <span class="app-version-tag">V.1.2.5 PRO</span> • PWA Auto-Sync
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-1">MMYS <span class="text-blue-500 app-version-title">V.1.2.5 PRO</span></h1>
             <p class="text-slate-500 dark:text-slate-400 mb-6 md:mb-8 italic text-xs md:text-sm">Puskesmas Sampanahan Digital Ecosystem</p>
             
             <div class="max-w-md mx-auto space-y-4 text-left bg-white/40 dark:bg-slate-800/40 p-5 md:p-6 rounded-3xl border border-white">
@@ -164,7 +168,7 @@
             </div>
             
             <div id="print-area" class="text-center">
-                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.4 PRO</span></h2>
+                <h2 class="font-bold text-lg md:text-xl text-slate-800 dark:text-white mb-6">LAPORAN SKRINING MMYS <span class="app-version-tag">V.1.2.5 PRO</span></h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8 text-sm p-4 md:p-6 bg-white/30 dark:bg-slate-800/30 rounded-2xl text-left border border-white/20">
                     <p><span class="opacity-60">Nama:</span> <b id="resNama"></b></p>
@@ -189,7 +193,7 @@
 
                 <div class="mt-6 md:mt-8 py-6 border-t border-dashed border-slate-300">
                     <div id="qrcode" class="flex justify-center mb-2"></div>
-                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.4 PRO</span></p>
+                    <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">Validasi Puskesmas Digital MMYS <span class="app-version-tag">V.1.2.5 PRO</span></p>
                 </div>
             </div>
 
@@ -224,7 +228,7 @@
         const DB_COLLECTION = "skrining_mmys";
         const CONFIG_COLLECTION = "app_config";
         
-        let APP_VERSION = "V.1.2.4 PRO";
+        let APP_VERSION = "V.1.2.5 PRO";
         const DEFAULT_PIN = "1234";
 
         function getMasterPin() {
@@ -251,7 +255,6 @@
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
                     console.log('[PWA] ServiceWorker aktif:', reg.scope);
                     
-                    // Cek pembaruan berkala setiap service worker berganti
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -263,7 +266,6 @@
                 }).catch(err => console.log('[PWA] Gagal register:', err));
             });
 
-            // Reload halus otomatis saat service worker baru mengambil alih
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
